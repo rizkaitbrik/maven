@@ -1,0 +1,1 @@
+"""Maven FastAPI runtime"""

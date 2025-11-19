@@ -20,6 +20,19 @@
           "watchDepsName": "watch-deps"
         }
       }
+    },
+    {
+      "plugin": "@nxlv/python",
+      "options": {
+        "pyprojectPythonDependency": ">=3.12",
+        "pyenvPythonVersion": "3.12",
+        "packageManager": "uv"
+      }
     }
-  ]
+  ],
+  "generators": {
+    "@nxlv/python:uv-project": {
+      "sourceRoot": "{projectRoot}/src"
+    }
+  }
 }
