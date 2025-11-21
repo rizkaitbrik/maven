@@ -2,7 +2,15 @@
 name = "maven"
 version = "0.1.0"
 requires-python = ">=3.12"
-dependencies = [ "api", "cli", "core", "retrieval" ]
+dependencies = [
+ "api",
+ "cli",
+ "core",
+ "dotenv>=0.9.9",
+ "pydantic>=2.12.4",
+ "python-dotenv>=1.2.1",
+ "retrieval",
+]
 
 [tool.uv]
 dev-dependencies = [ ]

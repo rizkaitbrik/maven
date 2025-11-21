@@ -24,7 +24,7 @@ readme = 'README.md'
 dependencies = []
 
 [tool.hatch.build.targets.wheel]
-packages = ["src"]
+packages = ["core"]
 
 [tool.hatch.metadata]
 allow-direct-references = true

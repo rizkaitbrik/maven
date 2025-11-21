@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from retrieval.models.config import RetrieverConfig
 
 
 @dataclass
@@ -6,6 +7,7 @@ class SearchRequest:
     query: str
     page: int = 1
     size: int = 10
+    config: RetrieverConfig | None = None
 
 @dataclass
 class SearchResult:

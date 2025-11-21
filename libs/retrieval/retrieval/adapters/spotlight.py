@@ -3,23 +3,34 @@ import subprocess
 from pathlib import Path
 from retrieval.interfaces.retriever import Retriever
 from retrieval.models.search import SearchResult, SearchResponse, SearchRequest
+from retrieval.models.config import RetrieverConfig
 
 
 class SpotlightAdapter:
     """macOS Spotlight retriever via mdfind."""
 
-    def __init__(self, root: Path | None = None):
+    def __init__(self, root: Path | None = None, config: RetrieverConfig | None = None):
         self.root = root or Path.home()
+        self.config = config or RetrieverConfig()
+
+    def _filter_paths(self, paths: list[Path]) -> list[Path]:
+        return [p for p in paths if self.config.is_allowed(p) \
+            and not self.config.is_blocked(p)]
 
     async def search(self, request: SearchRequest) -> SearchResponse:
         offset = (request.page - 1) * request.size
         limit = offset + request.size
+        config = request.config or self.config
 
-        cmd = [
-            "mdfind",
-            "-onlyin", str(self.root),
-            request.query  # No -limit flag, just the query
-        ]
+        cmd = ["mdfind"]
+
+        if config.allow_list:
+            for p in range(len(config.allow_list)):
+                cmd.extend(["-onlyin", str(config.allow_list[p])])
+        else:
+            cmd.extend(["-onlyin", str(self.root)])
+
+        cmd.append(f'"{request.query}"')
 
         proc = await asyncio.create_subprocess_exec(
             *cmd,
@@ -34,13 +45,13 @@ class SpotlightAdapter:
         else:
             paths = [p for p in stdout.decode().strip().split('\n') if p]
 
-        # Apply pagination in Python
-        total = len(paths)
-        paginated = paths[offset:offset + request.size]
+        filtered_paths = self._filter_paths(paths)
+        total = len(filtered_paths)
+        paginated = filtered_paths[offset:offset + request.size]
 
         results = [
             SearchResult(
-                path=p,
+                path=str(p),
                 score=1.0 - (i / total) if total > 0 else 1.0,
                 metadata=None
             )
