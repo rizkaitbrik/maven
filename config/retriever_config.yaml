@@ -1,0 +1,30 @@
+# Maven Retriever Configuration
+# This file configures how the search command filters and retrieves files
+
+# Root directory for searches (defaults to user's home directory if not specified)
+# root: /Users/yourname
+
+# Path to the index file (relative to root)
+# index_path: index.json
+
+# Allowed list: Directories or patterns that are allowed in search results
+# If specified, only files matching these paths/patterns will be returned
+# Examples:
+#   - Specific directories: /Users/yourname/projects
+#   - Glob patterns: **/src/**, **/*.py
+allowed_list:
+  # Add your allowed directories or patterns here
+  - "**/Downloads/**"
+
+# Block list: Directories or patterns to exclude from search results
+# Files matching these patterns will be filtered out
+block_list:
+  # Common directories to exclude
+  - "**/node_modules/**"
+  - "**/.git/**"
+  - "**/__pycache__/**"
+  - "**/.venv/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/.nx/**"
+

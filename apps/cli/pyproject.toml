@@ -1,6 +1,6 @@
 [tool.coverage.run]
 branch = true
-source = [ "cli" ]
+source = ["cli"]
 
 [tool.coverage.report]
 exclude_lines = ['if TYPE_CHECKING:']
@@ -24,7 +24,10 @@ readme = 'README.md'
 dependencies = [
     "rich>=14.2.0",
     "typer>=0.20.0",
-    "retrieval"
+    "retrieval",
+    "core",
+    "pydantic>=2.12.4",
+    "python-dotenv>=1.2.1",
 ]
 
 [project.scripts]
@@ -45,11 +48,11 @@ build-backend = "hatchling.build"
 
 [tool.ruff]
 exclude = [
-  ".ruff_cache",
-  ".svn",
-  ".tox",
-  ".venv",
-  "dist",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "dist",
 ]
 
 line-length = 88
@@ -57,18 +60,18 @@ indent-width = 4
 
 [tool.ruff.lint]
 select = [
-  # pycodestyle
-  "E",
-  # Pyflakes
-  "F",
-  # pyupgrade
-  "UP",
-  # flake8-bugbear
-  "B",
-  # flake8-simplify
-  "SIM",
-  # isort
-  "I",
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
 ]
 ignore = []
 
