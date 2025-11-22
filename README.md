@@ -1,90 +1,205 @@
 # Maven
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+A Python CLI tool for searching files using platform-native indexing (macOS Spotlight).
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+## Overview
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/js?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+Maven provides a fast, configurable search interface that leverages macOS Spotlight's indexing capabilities through `mdfind`. Built as an Nx monorepo with a modular architecture, Maven supports flexible path filtering, pagination, and multiple output formats.
 
-## Finish your remote caching setup
+## Features
 
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/44S81miveq)
+- 🔍 **Fast Search** - Leverages macOS Spotlight indexing via `mdfind`
+- 🎯 **Configurable Filtering** - Allow/block specific paths and patterns
+- 📄 **Pagination Support** - Browse results across pages
+- 🎨 **Rich CLI Output** - Beautiful tables with Rich library
+- 📊 **JSON Output** - Machine-readable format for scripting
+- 🏗️ **Modular Architecture** - Clean separation of concerns with adapters and interfaces
 
-
-## Generate a library
-
-```sh
-npx nx g @nx/js:lib packages/pkg1 --publishable --importPath=@my-org/pkg1
-```
-
-## Run tasks
-
-To build the library use:
-
-```sh
-npx nx build pkg1
-```
-
-To run any task with Nx use:
-
-```sh
-npx nx <target> <project-name>
-```
-
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
-
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Versioning and releasing
-
-To version and release the library use
+## Project Structure
 
 ```
-npx nx release
+maven/
+├── apps/
+│   ├── api/          # API application
+│   └── cli/          # CLI application (main entry point)
+├── libs/
+│   ├── core/         # Core shared library
+│   └── retrieval/    # Retrieval library
+│       ├── adapters/     # Platform adapters (SpotlightAdapter)
+│       ├── interfaces/   # Protocol definitions (Retriever)
+│       ├── models/       # Data models (config, search)
+│       └── services/     # Business logic (config_manager)
+└── config/           # Configuration files
 ```
 
-Pass `--dry-run` to see what would happen without actually releasing the library.
+## Installation
 
-[Learn more about Nx release &raquo;](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+This project uses [uv](https://github.com/astral-sh/uv) for dependency management:
 
-## Keep TypeScript project references up to date
+```bash
+# Install dependencies
+uv sync
 
-Nx automatically updates TypeScript [project references](https://www.typescriptlang.org/docs/handbook/project-references.html) in `tsconfig.json` files to ensure they remain accurate based on your project dependencies (`import` or `require` statements). This sync is automatically done when running tasks such as `build` or `typecheck`, which require updated references to function correctly.
+# Install the CLI
+uv pip install -e apps/cli
+```
 
-To manually trigger the process to sync the project graph dependencies information to the TypeScript project references, run the following command:
+## Usage
 
-```sh
+### Basic Search
+
+```bash
+maven search "your query"
+```
+
+### Advanced Options
+
+```bash
+# Search with custom root directory
+maven search "query" --root /path/to/directory
+
+# Limit results and pagination
+maven search "query" --limit 20 --page 2
+
+# JSON output for scripting
+maven search "query" --json
+```
+
+### Configuration
+
+Create a `config/retriever_config.yaml` file to configure path filtering:
+
+```yaml
+root: /Users/username/Documents
+allowed_list:
+  - /Users/username/Documents/projects
+  - /Users/username/Documents/notes
+blocked_list:
+  - "**/node_modules/**"
+  - "**/.git/**"
+  - "**/__pycache__/**"
+```
+
+## Development
+
+This is an Nx monorepo. Common commands:
+
+### Run Tasks
+
+```bash
+# Run tests for a specific project
+npx nx test cli
+
+# Run tests for all projects
+npx nx run-many -t test
+
+# Build a specific project
+npx nx build cli
+
+# Lint/format with ruff
+npx nx lint retrieval
+```
+
+### Testing
+
+```bash
+# Run all tests
+uv run pytest
+
+# Run tests with coverage
+uv run pytest --cov
+
+# Run tests for specific project
+cd libs/retrieval && uv run pytest
+```
+
+### Project Graph
+
+Visualize the project dependencies:
+
+```bash
+npx nx graph
+```
+
+## Architecture
+
+### Retrieval System
+
+The retrieval system follows a clean architecture pattern:
+
+1. **Interfaces** (`retrieval.interfaces.retriever.Retriever`) - Protocol defining the search contract
+2. **Adapters** (`retrieval.adapters.spotlight.SpotlightAdapter`) - Platform-specific implementations
+3. **Models** - Data structures for requests, responses, and configuration
+4. **Services** - Business logic for configuration management
+
+This design allows easy extension with additional search backends (e.g., Elasticsearch, local indexing) by implementing the `Retriever` protocol.
+
+### Configuration Management
+
+The `ConfigManager` service loads configuration from:
+1. Config files (`config/retriever_config.yaml`)
+2. Environment variables
+3. Default values
+
+Configuration supports:
+- Root search directory
+- Allowed path patterns (glob support)
+- Blocked path patterns (glob support)
+
+## Requirements
+
+- macOS (uses Spotlight/mdfind)
+- Python 3.12+
+- Node.js (for Nx)
+
+## Tech Stack
+
+- **Package Management**: uv
+- **Monorepo**: Nx
+- **CLI Framework**: Typer
+- **UI/Formatting**: Rich
+- **Testing**: pytest, pytest-cov, pytest-sugar
+- **Linting/Formatting**: ruff, autopep8
+
+## Nx Workspace
+
+This workspace uses Nx for task orchestration and caching:
+
+### Useful Nx Commands
+
+```bash
+# See affected projects
+npx nx affected:graph
+
+# Run tasks on affected projects only
+npx nx affected -t test
+
+# Clear cache
+npx nx reset
+
+# Sync TypeScript project references
 npx nx sync
 ```
 
-You can enforce that the TypeScript project references are always in the correct state when running in CI by adding a step to your CI job configuration that runs the following command:
+### Nx Console
 
-```sh
-npx nx sync:check
-```
+For a better developer experience, install [Nx Console](https://nx.dev/getting-started/editor-setup) for your IDE.
 
-[Learn more about nx sync](https://nx.dev/reference/nx-commands#sync)
+## Contributing
 
+1. Create a feature branch
+2. Make your changes
+3. Run tests: `npx nx run-many -t test`
+4. Run linting: `npx nx run-many -t lint`
+5. Submit a pull request
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## Learn More
 
-## Install Nx Console
+- [Nx Documentation](https://nx.dev)
+- [uv Documentation](https://github.com/astral-sh/uv)
+- [Typer Documentation](https://typer.tiangolo.com)
+- [Rich Documentation](https://rich.readthedocs.io)
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+## License
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/nx-api/js?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+[Add your license here]
