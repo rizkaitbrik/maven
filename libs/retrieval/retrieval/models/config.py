@@ -10,6 +10,7 @@ class RetrieverConfig:
     index_path: str = field(default="index.json")
     allowed_list: list[str] = field(default_factory=list)
     block_list: list[str] = field(default_factory=list)
+    text_extensions: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         self.root = Path(self.root)
