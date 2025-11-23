@@ -9,9 +9,10 @@ Maven provides a fast, configurable search interface that leverages macOS Spotli
 ## Features
 
 - 🔍 **Fast Search** - Leverages macOS Spotlight indexing via `mdfind`
+- 📝 **Content Search** - Search inside file contents with regex support
 - 🎯 **Configurable Filtering** - Allow/block specific paths and patterns
 - 📄 **Pagination Support** - Browse results across pages
-- 🎨 **Rich CLI Output** - Beautiful tables with Rich library
+- 🎨 **Rich CLI Output** - Beautiful tables and snippets with Rich library
 - 📊 **JSON Output** - Machine-readable format for scripting
 - 🏗️ **Modular Architecture** - Clean separation of concerns with adapters and interfaces
 
@@ -49,7 +50,11 @@ uv pip install -e apps/cli
 ### Basic Search
 
 ```bash
+# Search filenames (Spotlight)
 maven search "your query"
+
+# Search file contents
+maven search "your query" --content
 ```
 
 ### Advanced Options
@@ -58,19 +63,27 @@ maven search "your query"
 # Search with custom root directory
 maven search "query" --root /path/to/directory
 
+# Content search with regex patterns
+maven search "def.*\(" --content
+
 # Limit results and pagination
 maven search "query" --limit 20 --page 2
 
 # JSON output for scripting
 maven search "query" --json
+
+# Combine options
+maven search "TODO" --content --root ~/projects --limit 5 --json
 ```
 
 ### Configuration
 
-Create a `config/retriever_config.yaml` file to configure path filtering:
+Create a `config/retriever_config.yaml` file to configure path filtering and content search:
 
 ```yaml
 root: /Users/username/Documents
+
+# Path filtering
 allowed_list:
   - /Users/username/Documents/projects
   - /Users/username/Documents/notes
@@ -78,6 +91,15 @@ blocked_list:
   - "**/node_modules/**"
   - "**/.git/**"
   - "**/__pycache__/**"
+
+# Content search - file extensions to treat as text
+text_extensions:
+  - .py
+  - .js
+  - .md
+  - .txt
+  - .json
+  # ... add more as needed
 ```
 
 ## Development
@@ -145,6 +167,7 @@ Configuration supports:
 - Root search directory
 - Allowed path patterns (glob support)
 - Blocked path patterns (glob support)
+- Text file extensions for content search
 
 ## Requirements
 

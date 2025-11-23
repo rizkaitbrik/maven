@@ -14,7 +14,9 @@
 #   - Glob patterns: **/src/**, **/*.py
 allowed_list:
   # Add your allowed directories or patterns here
-  - "**/Downloads/**"
+  # - "**/Downloads/**"
+  # For development, you can comment out allowed_list to search everywhere
+  # or add specific paths you want to search
 
 # Block list: Directories or patterns to exclude from search results
 # Files matching these patterns will be filtered out
@@ -27,4 +29,62 @@ block_list:
   - "**/dist/**"
   - "**/build/**"
   - "**/.nx/**"
+
+# Text extensions: File extensions to treat as text for content search
+# If not specified, uses built-in defaults (Python, JavaScript, Markdown, etc.)
+# Extensions can be specified with or without the leading dot
+text_extensions:
+  # Programming languages
+  - .py
+  - .js
+  - .ts
+  - .tsx
+  - .jsx
+  - .java
+  - .c
+  - .cpp
+  - .h
+  - .hpp
+  - .cs
+  - .go
+  - .rs
+  - .rb
+  - .php
+  - .swift
+  - .kt
+  - .scala
+  
+  # Markup and documentation
+  - .md
+  - .rst
+  - .txt
+  - .html
+  - .xml
+  
+  # Configuration
+  - .json
+  - .yaml
+  - .yml
+  - .toml
+  - .ini
+  - .conf
+  - .cfg
+  - .env
+  
+  # Scripts
+  - .sh
+  - .bash
+  - .zsh
+  - .fish
+  - .ps1
+  
+  # Styles
+  - .css
+  - .scss
+  - .sass
+  
+  # Data
+  - .csv
+  - .tsv
+  - .sql
 

@@ -66,6 +66,7 @@ class ConfigManager:
             "index_path": str(config.index_path),
             "allowed_list": config.allowed_list,
             "block_list": config.block_list,
+            "text_extensions": config.text_extensions,
         }
         
         with open(self.config_path, "w") as f:
