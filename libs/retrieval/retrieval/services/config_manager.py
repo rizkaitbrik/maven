@@ -1,7 +1,13 @@
 import os
 import json
 from pathlib import Path
-from retrieval.models.config import RetrieverConfig
+from retrieval.models.config import (
+    RetrieverConfig,
+    IndexConfig,
+    HybridSearchConfig,
+    LoggingConfig,
+    DaemonConfig
+)
 
 try:
     import yaml
@@ -58,6 +64,19 @@ class ConfigManager:
             file_allowed_list = config_data.get("allowed_list", [])
             config_data["allowed_list"] = list(set(self.env_allowed_list + file_allowed_list))
         
+        # Parse nested configurations
+        if "index" in config_data and isinstance(config_data["index"], dict):
+            config_data["index"] = IndexConfig(**config_data["index"])
+        
+        if "hybrid_search" in config_data and isinstance(config_data["hybrid_search"], dict):
+            config_data["hybrid_search"] = HybridSearchConfig(**config_data["hybrid_search"])
+        
+        if "logging" in config_data and isinstance(config_data["logging"], dict):
+            config_data["logging"] = LoggingConfig(**config_data["logging"])
+        
+        if "daemon" in config_data and isinstance(config_data["daemon"], dict):
+            config_data["daemon"] = DaemonConfig(**config_data["daemon"])
+        
         return RetrieverConfig(**config_data) if config_data else RetrieverConfig()
 
     def save_config(self, config: RetrieverConfig):
@@ -67,6 +86,20 @@ class ConfigManager:
             "allowed_list": config.allowed_list,
             "block_list": config.block_list,
             "text_extensions": config.text_extensions,
+            "index": {
+                "db_path": config.index.db_path,
+                "enable_watcher": config.index.enable_watcher,
+                "debounce_ms": config.index.debounce_ms,
+                "max_file_size": config.index.max_file_size,
+                "auto_index_on_search": config.index.auto_index_on_search,
+                "reindex_on_startup": config.index.reindex_on_startup,
+            },
+            "hybrid_search": {
+                "enabled": config.hybrid_search.enabled,
+                "filename_match_weight": config.hybrid_search.filename_match_weight,
+                "content_match_weight": config.hybrid_search.content_match_weight,
+                "deduplicate": config.hybrid_search.deduplicate,
+            },
         }
         
         with open(self.config_path, "w") as f:

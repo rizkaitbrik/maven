@@ -7,8 +7,11 @@ from rich.syntax import Syntax
 from rich.panel import Panel
 from retrieval.adapters.spotlight import SpotlightAdapter
 from retrieval.adapters.content_search import ContentSearchAdapter
+from retrieval.adapters.hybrid_search import HybridSearchAdapter
 from retrieval.models.search import SearchRequest, MatchType
 from retrieval.services.config_manager import ConfigManager
+from retrieval.services.background_indexer import BackgroundIndexer
+from retrieval.services.index_manager import IndexManager
 
 console = Console()
 
@@ -18,9 +21,10 @@ def search(
     limit: int = typer.Option(10, help="Max results per page"),
     page: int = typer.Option(1, help="Page number"),
     json: bool = typer.Option(False, help="Output as JSON"),
-    content: bool = typer.Option(False, "--content", "-c", help="Search inside file contents")
+    content: bool = typer.Option(False, "--content", "-c", help="Search inside file contents"),
+    hybrid: bool = typer.Option(False, "--hybrid", "-h", help="Use hybrid search (Spotlight + indexed content)")
 ):
-    """Search files using platform-native indexing or content-based search."""
+    """Search files using platform-native indexing, content search, or hybrid mode."""
     
     # Load configuration from config file and environment
     try:
@@ -37,7 +41,20 @@ def search(
         config.root = Path(root)
     
     # Choose adapter based on search type
-    if content:
+    if hybrid:
+        adapter = HybridSearchAdapter(config.root, config=config)
+        search_type = "hybrid"
+        
+        # Start background indexing if needed
+        if config.index.auto_index_on_search:
+            index_manager = IndexManager(config.index, config.text_extensions)
+            stats = index_manager.get_stats()
+            
+            if stats['file_count'] == 0:
+                console.print("[yellow]Index is empty, starting background indexing...[/yellow]")
+                indexer = BackgroundIndexer(index_manager, config)
+                indexer.start_indexing(config.root)
+    elif content:
         adapter = ContentSearchAdapter(config.root, config=config)
         search_type = "content"
     else:
@@ -72,7 +89,12 @@ def search(
     else:
         # Show pagination info
         total_pages = (response.total + limit - 1) // limit if limit > 0 else 1
-        search_label = "Content Search" if content else "File Search"
+        if hybrid:
+            search_label = "Hybrid Search"
+        elif content:
+            search_label = "Content Search"
+        else:
+            search_label = "File Search"
         title = f"{search_label}: '{query}' (Page {page}/{total_pages}, {response.total} total)"
         
         if content:
@@ -107,8 +129,8 @@ def search(
             console.print(table)
         
         # Show navigation hints
-        content_flag = " --content" if content else ""
+        mode_flag = " --hybrid" if hybrid else (" --content" if content else "")
         if page < total_pages:
-            console.print(f"\n[dim]Next page: maven search \"{query}\"{content_flag} --page {page + 1}[/dim]")
+            console.print(f"\n[dim]Next page: maven search \"{query}\"{mode_flag} --page {page + 1}[/dim]")
         if page > 1:
-            console.print(f"[dim]Previous page: maven search \"{query}\"{content_flag} --page {page - 1}[/dim]")
+            console.print(f"[dim]Previous page: maven search \"{query}\"{mode_flag} --page {page - 1}[/dim]")

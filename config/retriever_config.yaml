@@ -1,90 +1,93 @@
 # Maven Retriever Configuration
-# This file configures how the search command filters and retrieves files
 
-# Root directory for searches (defaults to user's home directory if not specified)
-# root: /Users/yourname
+# Root directory to search from (default: home directory)
+root: "."
 
-# Path to the index file (relative to root)
-# index_path: index.json
+# Index file path (default: ~/.maven/index.json)
+index_path: "~/.maven/index.json"
 
-# Allowed list: Directories or patterns that are allowed in search results
-# If specified, only files matching these paths/patterns will be returned
-# Examples:
-#   - Specific directories: /Users/yourname/projects
-#   - Glob patterns: **/src/**, **/*.py
+# Allowed directories to search (empty = search all)
+# Patterns: absolute paths, relative paths, glob patterns
 allowed_list:
-  # Add your allowed directories or patterns here
-  # - "**/Downloads/**"
-  # For development, you can comment out allowed_list to search everywhere
-  # or add specific paths you want to search
+  # - "**Downloads/**"
+  # - "/Users/username/Documents/**"
 
-# Block list: Directories or patterns to exclude from search results
-# Files matching these patterns will be filtered out
+# Blocked directories to exclude from search
 block_list:
-  # Common directories to exclude
   - "**/node_modules/**"
   - "**/.git/**"
   - "**/__pycache__/**"
+  - "**/venv/**"
   - "**/.venv/**"
   - "**/dist/**"
   - "**/build/**"
-  - "**/.nx/**"
+  - "**/.next/**"
+  - "**/.cache/**"
 
-# Text extensions: File extensions to treat as text for content search
-# If not specified, uses built-in defaults (Python, JavaScript, Markdown, etc.)
-# Extensions can be specified with or without the leading dot
+# Text file extensions for content extraction
 text_extensions:
-  # Programming languages
-  - .py
-  - .js
-  - .ts
-  - .tsx
-  - .jsx
-  - .java
-  - .c
-  - .cpp
-  - .h
-  - .hpp
-  - .cs
-  - .go
-  - .rs
-  - .rb
-  - .php
-  - .swift
-  - .kt
-  - .scala
-  
-  # Markup and documentation
-  - .md
-  - .rst
-  - .txt
-  - .html
-  - .xml
-  
-  # Configuration
-  - .json
-  - .yaml
-  - .yml
-  - .toml
-  - .ini
-  - .conf
-  - .cfg
-  - .env
-  
-  # Scripts
-  - .sh
-  - .bash
-  - .zsh
-  - .fish
-  - .ps1
-  
-  # Styles
-  - .css
-  - .scss
-  - .sass
-  
-  # Data
-  - .csv
-  - .tsv
-  - .sql
+  - ".txt"
+  - ".md"
+  - ".py"
+  - ".js"
+  - ".ts"
+  - ".jsx"
+  - ".tsx"
+  - ".java"
+  - ".c"
+  - ".cpp"
+  - ".h"
+  - ".hpp"
+  - ".go"
+  - ".rs"
+  - ".rb"
+  - ".php"
+  - ".html"
+  - ".css"
+  - ".scss"
+  - ".json"
+  - ".yaml"
+  - ".yml"
+  - ".toml"
+  - ".xml"
+  - ".sh"
+  - ".bash"
+  - ".zsh"
+  - ".fish"
+  - ".sql"
+  - ".graphql"
+  - ".proto"
+  - ".env"
+  - ".log"
 
+# Index configuration
+index:
+  db_path: "~/.maven/index.db"
+  enable_watcher: true
+  debounce_ms: 1000
+  max_file_size: 10485760
+  auto_index_on_search: true
+  reindex_on_startup: true
+
+# Hybrid search configuration
+hybrid_search:
+  enabled: true
+  filename_match_weight: 2.0
+  content_match_weight: 1.0
+  deduplicate: true
+
+# Logging configuration
+logging:
+  level: "INFO"
+  log_dir: "~/.maven/logs"
+  max_file_size: 10485760  # 10MB
+  backup_count: 5
+  enable_syslog: true
+  enable_console: true
+
+# Daemon configuration
+daemon:
+  grpc_host: "localhost"
+  grpc_port: 50051
+  state_dir: "~/.maven"
+  auto_start: false

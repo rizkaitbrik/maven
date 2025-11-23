@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package maven;
+
+// Daemon service for background indexing and file watching
+service DaemonService {
+  // Check if daemon is running
+  rpc Ping(PingRequest) returns (PingResponse);
+  
+  // Get daemon status
+  rpc GetStatus(StatusRequest) returns (StatusResponse);
+  
+  // Start/stop indexing
+  rpc StartIndexing(IndexRequest) returns (IndexResponse);
+  rpc StopIndexing(StopRequest) returns (StopResponse);
+  
+  // Get index stats
+  rpc GetIndexStats(StatsRequest) returns (StatsResponse);
+  
+  // Shutdown daemon
+  rpc Shutdown(ShutdownRequest) returns (ShutdownResponse);
+}
+
+message PingRequest {}
+
+message PingResponse {
+  bool alive = 1;
+  string version = 2;
+}
+
+message StatusRequest {}
+
+message StatusResponse {
+  bool running = 1;
+  bool indexing = 2;
+  bool watcher_active = 3;
+  int32 files_indexed = 4;
+  string uptime = 5;
+  int32 pid = 6;
+}
+
+message IndexRequest {
+  string root_path = 1;
+  bool rebuild = 2;
+}
+
+message IndexResponse {
+  bool started = 1;
+  string message = 2;
+}
+
+message StopRequest {}
+
+message StopResponse {
+  bool stopped = 1;
+  string message = 2;
+}
+
+message StatsRequest {}
+
+message StatsResponse {
+  int32 file_count = 1;
+  int64 total_size_bytes = 2;
+  double last_indexed_at = 3;
+  string db_path = 4;
+}
+
+message ShutdownRequest {}
+
+message ShutdownResponse {
+  bool shutdown = 1;
+  string message = 2;
+}
+

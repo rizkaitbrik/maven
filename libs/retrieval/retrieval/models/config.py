@@ -4,6 +4,46 @@ from fnmatch import fnmatch
 
 
 @dataclass
+class IndexConfig:
+    """Index configuration for SQLite FTS."""
+    db_path: str = field(default=".maven/index.db")
+    enable_watcher: bool = field(default=True)
+    debounce_ms: int = field(default=500)
+    max_file_size: int = field(default=10485760)  # 10MB
+    auto_index_on_search: bool = field(default=True)
+    reindex_on_startup: bool = field(default=False)
+
+
+@dataclass
+class HybridSearchConfig:
+    """Hybrid search configuration."""
+    enabled: bool = field(default=True)
+    filename_match_weight: float = field(default=2.0)
+    content_match_weight: float = field(default=1.0)
+    deduplicate: bool = field(default=True)
+
+
+@dataclass
+class LoggingConfig:
+    """Logging configuration."""
+    level: str = field(default="INFO")
+    log_dir: str = field(default="~/.maven/logs")
+    max_file_size: int = field(default=10485760)  # 10MB
+    backup_count: int = field(default=5)
+    enable_syslog: bool = field(default=True)
+    enable_console: bool = field(default=True)
+
+
+@dataclass
+class DaemonConfig:
+    """Daemon configuration."""
+    grpc_host: str = field(default="localhost")
+    grpc_port: int = field(default=50051)
+    state_dir: str = field(default="~/.maven")
+    auto_start: bool = field(default=False)
+
+
+@dataclass
 class RetrieverConfig:
     """Retriever configuration."""
     root: str = field(default=str(Path.home()))
@@ -11,6 +51,10 @@ class RetrieverConfig:
     allowed_list: list[str] = field(default_factory=list)
     block_list: list[str] = field(default_factory=list)
     text_extensions: list[str] = field(default_factory=list)
+    index: IndexConfig = field(default_factory=IndexConfig)
+    hybrid_search: HybridSearchConfig = field(default_factory=HybridSearchConfig)
+    logging: LoggingConfig = field(default_factory=LoggingConfig)
+    daemon: DaemonConfig = field(default_factory=DaemonConfig)
 
     def __post_init__(self):
         self.root = Path(self.root)

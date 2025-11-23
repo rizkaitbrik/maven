@@ -26,6 +26,8 @@ dependencies = [
     "typer>=0.20.0",
     "retrieval",
     "core",
+    "daemon",
+    "maven-logging",
     "pydantic>=2.12.4",
     "python-dotenv>=1.2.1",
 ]

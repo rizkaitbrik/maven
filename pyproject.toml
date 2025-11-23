@@ -2,18 +2,13 @@
 name = "maven"
 version = "0.1.0"
 requires-python = ">=3.12"
-dependencies = [
-    "cli",
-]
+dependencies = [ "cli", "daemon", "maven-logging" ]
 
 [tool.uv]
-dev-dependencies = []
+dev-dependencies = [ ]
 
-[tool.uv.workspace]
-members = [
-    "apps/*",
-    "libs/*"
-]
+  [tool.uv.workspace]
+  members = [ "apps/*", "apps/daemon", "libs/*", "libs/logging" ]
 
 [tool.uv.sources.api]
 workspace = true
@@ -24,15 +19,21 @@ workspace = true
 [tool.uv.sources.core]
 workspace = true
 
+[tool.uv.sources.daemon]
+workspace = true
+
+[tool.uv.sources.maven-logging]
+workspace = true
+
 [tool.uv.sources.retrieval]
 workspace = true
 
 [dependency-groups]
 dev = [
-    "ruff>=0.8.2",
-    "autopep8>=2.3.1",
-    "pytest>=8.3.4",
-    "pytest-sugar>=1.0.0",
-    "pytest-cov>=6.0.0",
-    "pytest-html>=4.1.1"
+  "ruff>=0.8.2",
+  "autopep8>=2.3.1",
+  "pytest>=8.3.4",
+  "pytest-sugar>=1.0.0",
+  "pytest-cov>=6.0.0",
+  "pytest-html>=4.1.1"
 ]
