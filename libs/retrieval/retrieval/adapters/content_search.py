@@ -2,9 +2,14 @@
 
 import re
 from pathlib import Path
-from retrieval.interfaces.retriever import Retriever
-from retrieval.models.search import SearchRequest, SearchResponse, SearchResult, MatchType
+
 from retrieval.models.config import RetrieverConfig
+from retrieval.models.search import (
+    MatchType,
+    SearchRequest,
+    SearchResponse,
+    SearchResult,
+)
 from retrieval.services.content_extractor import ContentExtractor
 
 
@@ -78,10 +83,7 @@ class ContentSearchAdapter:
             return False
         
         # Check if it's a text file
-        if not self.extractor.is_text_file(file_path):
-            return False
-        
-        return True
+        return self.extractor.is_text_file(file_path)
 
     def _walk_directory(self, root: Path) -> list[Path]:
         """Recursively walk directory and yield files that pass filtering.
@@ -186,9 +188,6 @@ class ContentSearchAdapter:
         Returns:
             SearchResponse with matching results
         """
-        # Use config from request if provided
-        config = request.config or self.config
-        
         # Get directories to search
         search_paths = self._get_search_paths()
         

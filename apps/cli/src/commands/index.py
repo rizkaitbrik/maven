@@ -1,13 +1,20 @@
 """Index management commands."""
 
-import typer
 from pathlib import Path
-from rich.console import Console
-from rich.table import Table
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
+
+import typer
+from retrieval.services.background_indexer import BackgroundIndexer
 from retrieval.services.config_manager import ConfigManager
 from retrieval.services.index_manager import IndexManager
-from retrieval.services.background_indexer import BackgroundIndexer
+from rich.console import Console
+from rich.progress import (
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TextColumn,
+    TimeElapsedColumn,
+)
+from rich.table import Table
 
 console = Console()
 

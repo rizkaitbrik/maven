@@ -2,10 +2,12 @@
 
 import sys
 from pathlib import Path
-from retrieval.services.config_manager import ConfigManager
-from daemon.service import MavenDaemon
-from daemon.server import create_grpc_server
+
 from maven_logging import get_logger
+from retrieval.services.config_manager import ConfigManager
+
+from daemon.server import create_grpc_server
+from daemon.service import MavenDaemon
 
 
 def main():

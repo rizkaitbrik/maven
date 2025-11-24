@@ -5,7 +5,6 @@ requires-python = ">=3.12"
 dependencies = [ "cli", "daemon", "maven-logging" ]
 
 [tool.uv]
-dev-dependencies = [ ]
 
   [tool.uv.workspace]
   members = [ "apps/*", "apps/daemon", "libs/*", "libs/logging" ]

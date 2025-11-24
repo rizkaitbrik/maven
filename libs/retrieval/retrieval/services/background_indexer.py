@@ -3,10 +3,12 @@
 import threading
 from pathlib import Path
 from typing import Callable
-from retrieval.models.config import RetrieverConfig
-from retrieval.services.index_manager import IndexManager
-from retrieval.services.fs_watcher import FileSystemWatcher
+
 from maven_logging import get_logger
+
+from retrieval.models.config import RetrieverConfig
+from retrieval.services.fs_watcher import FileSystemWatcher
+from retrieval.services.index_manager import IndexManager
 
 
 class BackgroundIndexer:
@@ -101,7 +103,11 @@ class BackgroundIndexer:
             for i, file_path in enumerate(files):
                 if not self._is_indexing:
                     # Indexing was cancelled
-                    self.logger.warning("Indexing cancelled", indexed=self._indexed_count, total=self._total_count)
+                    self.logger.warning(
+                        "Indexing cancelled",
+                        indexed=self._indexed_count,
+                        total=self._total_count
+                    )
                     break
                 
                 try:
@@ -109,9 +115,18 @@ class BackgroundIndexer:
                     if self.index_manager.needs_reindex(file_path):
                         self.index_manager.add_or_update_file(file_path)
                         self._indexed_count += 1
-                        self.logger.debug("File indexed", path=str(file_path), progress=f"{i+1}/{self._total_count}")
+                        progress = f"{i+1}/{self._total_count}"
+                        self.logger.debug(
+                            "File indexed",
+                            path=str(file_path),
+                            progress=progress
+                        )
                 except Exception as e:
-                    self.logger.error("Failed to index file", path=str(file_path), error=str(e))
+                    self.logger.error(
+                        "Failed to index file",
+                        path=str(file_path),
+                        error=str(e)
+                    )
                 
                 # Report progress
                 if self._progress_callback and (i + 1) % 10 == 0:
@@ -119,13 +134,23 @@ class BackgroundIndexer:
                 
                 # Log progress every 100 files
                 if (i + 1) % 100 == 0:
-                    self.logger.info("Indexing progress", indexed=self._indexed_count, scanned=i+1, total=self._total_count)
+                    self.logger.info(
+                        "Indexing progress",
+                        indexed=self._indexed_count,
+                        scanned=i+1,
+                        total=self._total_count
+                    )
             
             # Final progress update
             if self._progress_callback:
                 self._progress_callback(self._total_count, self._total_count)
             
-            self.logger.info("Indexing completed", indexed=self._indexed_count, scanned=len(files), total=self._total_count)
+            self.logger.info(
+                "Indexing completed",
+                indexed=self._indexed_count,
+                scanned=len(files),
+                total=self._total_count
+            )
             
             # Start file system watcher after indexing completes
             if self._is_indexing and self.config.index.enable_watcher:

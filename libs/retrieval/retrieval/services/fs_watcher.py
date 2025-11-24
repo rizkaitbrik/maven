@@ -1,14 +1,14 @@
 """File system watcher for automatic index updates."""
 
-import time
 import threading
 from pathlib import Path
-from typing import Set
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler, FileSystemEvent
-from retrieval.models.config import RetrieverConfig, IndexConfig
-from retrieval.services.index_manager import IndexManager
+
 from maven_logging import get_logger
+from watchdog.events import FileSystemEvent, FileSystemEventHandler
+from watchdog.observers import Observer
+
+from retrieval.models.config import RetrieverConfig
+from retrieval.services.index_manager import IndexManager
 
 
 class DebouncedFileHandler(FileSystemEventHandler):
@@ -34,8 +34,8 @@ class DebouncedFileHandler(FileSystemEventHandler):
         self.logger = get_logger('retrieval.watcher')
         
         # Pending changes to process
-        self._pending_updates: Set[Path] = set()
-        self._pending_deletes: Set[Path] = set()
+        self._pending_updates: set[Path] = set()
+        self._pending_deletes: set[Path] = set()
         self._lock = threading.Lock()
         self._timer: threading.Timer | None = None
 
@@ -62,10 +62,7 @@ class DebouncedFileHandler(FileSystemEventHandler):
             return False
         
         # Check if text file
-        if not self.index_manager.content_extractor.is_text_file(file_path):
-            return False
-        
-        return True
+        return self.index_manager.content_extractor.is_text_file(file_path)
 
     def _schedule_flush(self):
         """Schedule a flush of pending changes."""
@@ -90,7 +87,11 @@ class DebouncedFileHandler(FileSystemEventHandler):
             self._timer = None
         
         if updates or deletes:
-            self.logger.info("Processing file changes", updates=len(updates), deletes=len(deletes))
+            self.logger.info(
+                "Processing file changes",
+                updates=len(updates),
+                deletes=len(deletes)
+            )
         
         # Process deletions first
         for file_path in deletes:
@@ -100,7 +101,11 @@ class DebouncedFileHandler(FileSystemEventHandler):
                     self.index_manager.remove_file(file_path)
                     self.logger.info("File removed from index", path=str(file_path))
                 except Exception as e:
-                    self.logger.error("Failed to remove file from index", path=str(file_path), error=str(e))
+                    self.logger.error(
+                        "Failed to remove file from index",
+                        path=str(file_path),
+                        error=str(e)
+                    )
         
         # Process updates
         for file_path in updates:
@@ -109,7 +114,11 @@ class DebouncedFileHandler(FileSystemEventHandler):
                 self.index_manager.add_or_update_file(file_path)
                 self.logger.info("File indexed", path=str(file_path))
             except Exception as e:
-                self.logger.error("Failed to index file", path=str(file_path), error=str(e))
+                self.logger.error(
+                    "Failed to index file",
+                    path=str(file_path),
+                    error=str(e)
+                )
 
     def on_created(self, event: FileSystemEvent):
         """Handle file creation."""
@@ -142,7 +151,7 @@ class DebouncedFileHandler(FileSystemEventHandler):
         
         file_path = Path(event.src_path)
         self.logger.debug("File deleted", path=str(file_path), action="deleted")
-        # Always process deletions (can't check if it should be processed since file is gone)
+        # Always process deletions (file is gone, can't check if processable)
         with self._lock:
             self._pending_deletes.add(file_path)
             # Remove from pending updates if it was there
@@ -158,7 +167,12 @@ class DebouncedFileHandler(FileSystemEventHandler):
         src_path = Path(event.src_path)
         dest_path = Path(event.dest_path)
         
-        self.logger.debug("File moved", src=str(src_path), dest=str(dest_path), action="moved")
+        self.logger.debug(
+            "File moved",
+            src=str(src_path),
+            dest=str(dest_path),
+            action="moved"
+        )
         
         with self._lock:
             self._pending_deletes.add(src_path)

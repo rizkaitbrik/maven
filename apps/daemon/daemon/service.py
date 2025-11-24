@@ -4,12 +4,14 @@ import os
 import signal
 import threading
 from pathlib import Path
-from retrieval.models.config import RetrieverConfig
-from retrieval.services.index_manager import IndexManager
-from retrieval.services.fs_watcher import FileSystemWatcher
-from retrieval.services.background_indexer import BackgroundIndexer
-from daemon.state import DaemonStateManager
+
 from maven_logging import get_logger
+from retrieval.models.config import RetrieverConfig
+from retrieval.services.background_indexer import BackgroundIndexer
+from retrieval.services.fs_watcher import FileSystemWatcher
+from retrieval.services.index_manager import IndexManager
+
+from daemon.state import DaemonStateManager
 
 
 class MavenDaemon:

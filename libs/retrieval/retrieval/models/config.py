@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
-from pathlib import Path, PurePath
 from fnmatch import fnmatch
+from pathlib import Path, PurePath
 
 
 @dataclass
@@ -112,8 +112,6 @@ class RetrieverConfig:
         if not self.block_list:
             return False
         
-        for pattern in self.block_list:
-            if self._matches_pattern(path, pattern):
-                return True
-                
-        return False
+        return any(
+            self._matches_pattern(path, pattern) for pattern in self.block_list
+        )

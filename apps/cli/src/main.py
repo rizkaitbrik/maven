@@ -1,7 +1,8 @@
 import typer
-from commands.search import search
-from commands.index import index
+
 from commands import daemon_cmd
+from commands.index import index
+from commands.search import search
 
 app = typer.Typer(
     help="Maven CLI",

@@ -1,9 +1,14 @@
 """Content search adapter using SQLite FTS index."""
 
 from pathlib import Path
-from retrieval.interfaces.retriever import Retriever
-from retrieval.models.search import SearchRequest, SearchResponse, SearchResult, MatchType
+
 from retrieval.models.config import RetrieverConfig
+from retrieval.models.search import (
+    MatchType,
+    SearchRequest,
+    SearchResponse,
+    SearchResult,
+)
 from retrieval.services.index_manager import IndexManager
 
 
@@ -69,7 +74,7 @@ class IndexedContentSearchAdapter:
             try:
                 file_path = Path(match.path)
                 if file_path.exists():
-                    with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
+                    with open(file_path, encoding='utf-8', errors='replace') as f:
                         content = f.read()
                         # Find the approximate line number
                         snippet_text = snippet.replace('→ ', '').replace('...', '').strip()

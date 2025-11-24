@@ -1,12 +1,13 @@
-import os
 import json
+import os
 from pathlib import Path
+
 from retrieval.models.config import (
-    RetrieverConfig,
-    IndexConfig,
+    DaemonConfig,
     HybridSearchConfig,
+    IndexConfig,
     LoggingConfig,
-    DaemonConfig
+    RetrieverConfig,
 )
 
 try:
@@ -15,7 +16,7 @@ except ImportError:
     yaml = None
 
 try:
-    from dotenv import load_dotenv, find_dotenv
+    from dotenv import find_dotenv, load_dotenv
     # Try to find and load .env file from current directory or parents
     dotenv_path = find_dotenv(usecwd=True)
     if dotenv_path:
@@ -53,7 +54,7 @@ class ConfigManager:
         config_data = {}
         
         if self.config_path.exists():
-            with open(self.config_path, "r") as f:
+            with open(self.config_path) as f:
                 if self.config_path.suffix in [".yaml", ".yml"] and yaml:
                     config_data = yaml.safe_load(f) or {}
                 else:
@@ -62,14 +63,19 @@ class ConfigManager:
         # Merge environment-based allowed list with config file
         if self.env_allowed_list:
             file_allowed_list = config_data.get("allowed_list", [])
-            config_data["allowed_list"] = list(set(self.env_allowed_list + file_allowed_list))
+            combined = list(set(self.env_allowed_list + file_allowed_list))
+            config_data["allowed_list"] = combined
         
         # Parse nested configurations
         if "index" in config_data and isinstance(config_data["index"], dict):
             config_data["index"] = IndexConfig(**config_data["index"])
         
-        if "hybrid_search" in config_data and isinstance(config_data["hybrid_search"], dict):
-            config_data["hybrid_search"] = HybridSearchConfig(**config_data["hybrid_search"])
+        if "hybrid_search" in config_data and isinstance(
+            config_data["hybrid_search"], dict
+        ):
+            config_data["hybrid_search"] = HybridSearchConfig(
+                **config_data["hybrid_search"]
+            )
         
         if "logging" in config_data and isinstance(config_data["logging"], dict):
             config_data["logging"] = LoggingConfig(**config_data["logging"])

@@ -1,17 +1,17 @@
 import asyncio
-import typer
 from pathlib import Path
-from rich.console import Console
-from rich.table import Table
-from rich.syntax import Syntax
-from rich.panel import Panel
-from retrieval.adapters.spotlight import SpotlightAdapter
+
+import typer
 from retrieval.adapters.content_search import ContentSearchAdapter
 from retrieval.adapters.hybrid_search import HybridSearchAdapter
-from retrieval.models.search import SearchRequest, MatchType
-from retrieval.services.config_manager import ConfigManager
+from retrieval.adapters.spotlight import SpotlightAdapter
+from retrieval.models.search import SearchRequest
 from retrieval.services.background_indexer import BackgroundIndexer
+from retrieval.services.config_manager import ConfigManager
 from retrieval.services.index_manager import IndexManager
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
 
 console = Console()
 

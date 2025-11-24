@@ -1,12 +1,18 @@
 """Hybrid search adapter combining Spotlight and indexed content search."""
 
 import asyncio
-from pathlib import Path
 from collections import defaultdict
-from retrieval.adapters.spotlight import SpotlightAdapter
+from pathlib import Path
+
 from retrieval.adapters.indexed_content_search import IndexedContentSearchAdapter
-from retrieval.models.search import SearchRequest, SearchResponse, SearchResult, MatchType
+from retrieval.adapters.spotlight import SpotlightAdapter
 from retrieval.models.config import RetrieverConfig
+from retrieval.models.search import (
+    MatchType,
+    SearchRequest,
+    SearchResponse,
+    SearchResult,
+)
 
 
 class HybridSearchAdapter:
@@ -83,14 +89,18 @@ class HybridSearchAdapter:
         # Merge or deduplicate based on config
         merged_results = []
         
-        for path, path_results in results_by_path.items():
+        for _path, path_results in results_by_path.items():
             if self.hybrid_config.deduplicate:
                 # Keep the highest scoring match
                 best_result = max(path_results, key=lambda r: r.score)
                 
                 # If same file matched in both, combine metadata
                 if len(path_results) > 1:
-                    sources = [r.metadata.get('source') for r in path_results if r.metadata]
+                    sources = [
+                        r.metadata.get('source')
+                        for r in path_results
+                        if r.metadata
+                    ]
                     match_types = [r.match_type for r in path_results]
                     
                     # Use content snippet if available, otherwise filename

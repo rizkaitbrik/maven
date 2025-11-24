@@ -1,9 +1,8 @@
 import asyncio
-import subprocess
 from pathlib import Path
-from retrieval.interfaces.retriever import Retriever
-from retrieval.models.search import SearchResult, SearchResponse, SearchRequest
+
 from retrieval.models.config import RetrieverConfig
+from retrieval.models.search import SearchRequest, SearchResponse, SearchResult
 
 
 class SpotlightAdapter:

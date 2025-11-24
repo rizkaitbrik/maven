@@ -1,4 +1,5 @@
 from typing import Protocol
+
 from retrieval.models.search import SearchRequest, SearchResponse
 
 

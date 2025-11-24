@@ -59,3 +59,10 @@ __pycache__
 
 *.db
 
+# Test artifacts and coverage
+.coverage
+coverage/
+reports/
+htmlcov/
+.pytest_cache/
+

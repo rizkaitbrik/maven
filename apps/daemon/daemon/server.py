@@ -1,12 +1,13 @@
 """gRPC server for Maven daemon."""
 
-import grpc
 from concurrent import futures
 from pathlib import Path
-from core import maven_pb2
-from core import maven_pb2_grpc
-from daemon.service import MavenDaemon
+
+import grpc
+from core import maven_pb2, maven_pb2_grpc
 from maven_logging import get_logger
+
+from daemon.service import MavenDaemon
 
 
 class DaemonServiceImpl(maven_pb2_grpc.DaemonServiceServicer):

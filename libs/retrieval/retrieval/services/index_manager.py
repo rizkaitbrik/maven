@@ -1,13 +1,15 @@
 """SQLite FTS5-based index manager for fast content search."""
 
-import sqlite3
 import hashlib
-from pathlib import Path
+import sqlite3
 from datetime import datetime
+from pathlib import Path
 from typing import NamedTuple
+
+from maven_logging import get_logger
+
 from retrieval.models.config import IndexConfig
 from retrieval.services.content_extractor import ContentExtractor
-from maven_logging import get_logger
 
 
 class IndexedFile(NamedTuple):
@@ -116,10 +118,19 @@ class IndexManager:
         try:
             file_size = file_path.stat().st_size
             if file_size > self.config.max_file_size:
-                self.logger.debug("File too large", path=str(file_path), size=file_size, max_size=self.config.max_file_size)
+                self.logger.debug(
+                    "File too large",
+                    path=str(file_path),
+                    size=file_size,
+                    max_size=self.config.max_file_size
+                )
                 return False
         except OSError as e:
-            self.logger.debug("Failed to get file stats", path=str(file_path), error=str(e))
+            self.logger.debug(
+                "Failed to get file stats",
+                path=str(file_path),
+                error=str(e)
+            )
             return False
         
         # Compute hash and metadata

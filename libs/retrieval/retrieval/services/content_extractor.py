@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import NamedTuple
+
 import chardet
 
 
@@ -58,13 +59,10 @@ class ContentExtractor:
             return True
         
         # Files without extension but common text file names
-        if path.name.lower() in {
+        return path.name.lower() in {
             'readme', 'license', 'makefile', 'dockerfile',
             'changelog', 'authors', 'contributors', 'todo',
-        }:
-            return True
-        
-        return False
+        }
 
     def _detect_encoding(self, file_path: Path, sample_size: int = 8192) -> str:
         """Detect file encoding.
@@ -134,7 +132,10 @@ class ContentExtractor:
                     encoding='',
                     lines=[],
                     success=False,
-                    error=f'File too large ({file_size} bytes > {self.max_file_size} bytes)'
+                    error=(
+                        f'File too large '
+                        f'({file_size} bytes > {self.max_file_size} bytes)'
+                    )
                 )
         except OSError as e:
             return ExtractedContent(
@@ -162,7 +163,7 @@ class ContentExtractor:
 
         # Try to read the file with detected encoding
         try:
-            with open(path, 'r', encoding=encoding, errors='replace') as f:
+            with open(path, encoding=encoding, errors='replace') as f:
                 content = f.read()
                 lines = content.splitlines()
             
@@ -178,7 +179,7 @@ class ContentExtractor:
         except UnicodeDecodeError:
             # Try with utf-8 as fallback
             try:
-                with open(path, 'r', encoding='utf-8', errors='replace') as f:
+                with open(path, encoding='utf-8', errors='replace') as f:
                     content = f.read()
                     lines = content.splitlines()
                 

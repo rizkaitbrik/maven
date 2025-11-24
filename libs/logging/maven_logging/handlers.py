@@ -79,17 +79,16 @@ def create_syslog_handler(
         # Try common syslog paths
         syslog_paths = ['/dev/log', '/var/run/syslog', ('localhost', 514)]
         
-        if isinstance(address, str):
-            # Check if path exists
-            if not Path(address).exists():
-                # Try alternatives
-                for path in syslog_paths:
-                    if isinstance(path, str) and Path(path).exists():
-                        address = path
-                        break
-                    elif isinstance(path, tuple):
-                        address = path
-                        break
+        if isinstance(address, str) and not Path(address).exists():
+            # Try alternatives
+            for path in syslog_paths:
+                is_valid = (
+                    isinstance(path, str) and Path(path).exists()
+                    or isinstance(path, tuple)
+                )
+                if is_valid:
+                    address = path
+                    break
         
         handler = logging.handlers.SysLogHandler(
             address=address,

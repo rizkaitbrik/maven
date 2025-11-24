@@ -3,11 +3,12 @@
 import logging
 from pathlib import Path
 from typing import Any
+
 from maven_logging.formatters import LogfmtFormatter
 from maven_logging.handlers import (
-    create_file_handler,
     create_console_handler,
-    create_syslog_handler
+    create_file_handler,
+    create_syslog_handler,
 )
 
 

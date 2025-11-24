@@ -1,9 +1,10 @@
 """Daemon management commands."""
 
-import typer
 import subprocess
 import sys
 from pathlib import Path
+
+import typer
 from rich.console import Console
 from rich.table import Table
 
@@ -43,9 +44,9 @@ def stop():
     """Stop the Maven daemon."""
     console.print("[yellow]Stopping Maven daemon...[/yellow]")
     
-    from daemon.state import DaemonStateManager
     import grpc
     from core import maven_pb2, maven_pb2_grpc
+    from daemon.state import DaemonStateManager
     from retrieval.services.config_manager import ConfigManager
     
     state_mgr = DaemonStateManager()
@@ -73,9 +74,9 @@ def stop():
 
 def status():
     """Check daemon status."""
-    from daemon.state import DaemonStateManager
     import grpc
     from core import maven_pb2, maven_pb2_grpc
+    from daemon.state import DaemonStateManager
     from retrieval.services.config_manager import ConfigManager
     
     state_mgr = DaemonStateManager()

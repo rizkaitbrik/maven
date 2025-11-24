@@ -3,8 +3,8 @@
 import os
 import sqlite3
 import time
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 
 class DaemonStateManager:
@@ -57,7 +57,7 @@ class DaemonStateManager:
                 # Process doesn't exist, clean up stale PID file
                 self.pid_file.unlink(missing_ok=True)
                 return False
-        except (ValueError, IOError):
+        except (OSError, ValueError):
             return False
     
     def get_pid(self) -> int | None:
@@ -71,7 +71,7 @@ class DaemonStateManager:
         
         try:
             return int(self.pid_file.read_text().strip())
-        except (ValueError, IOError):
+        except (OSError, ValueError):
             return None
     
     def write_pid(self, pid: int | None = None):
