@@ -22,7 +22,8 @@ def start(
     state_mgr = DaemonStateManager()
     
     if state_mgr.is_running():
-        console.print(f"[red]✗[/red] Daemon already running (PID: {state_mgr.get_pid()})")
+        pid = state_mgr.get_pid()
+        console.print(f"[red]✗[/red] Daemon already running (PID: {pid})")
         return
     
     # Start daemon
@@ -88,7 +89,8 @@ def status():
     # Get status via gRPC
     try:
         config = ConfigManager().config
-        channel = grpc.insecure_channel(f'{config.daemon.grpc_host}:{config.daemon.grpc_port}')
+        grpc_addr = f'{config.daemon.grpc_host}:{config.daemon.grpc_port}'
+        channel = grpc.insecure_channel(grpc_addr)
         stub = maven_pb2_grpc.DaemonServiceStub(channel)
         
         response = stub.GetStatus(maven_pb2.StatusRequest())
@@ -101,7 +103,8 @@ def status():
         table.add_row("PID", str(response.pid))
         table.add_row("Uptime", response.uptime)
         table.add_row("Indexing", "✓ Active" if response.indexing else "✗ Idle")
-        table.add_row("Watcher", "✓ Active" if response.watcher_active else "✗ Inactive")
+        watcher_status = "✓ Active" if response.watcher_active else "✗ Inactive"
+        table.add_row("Watcher", watcher_status)
         table.add_row("Files Indexed", str(response.files_indexed))
         
         console.print(table)

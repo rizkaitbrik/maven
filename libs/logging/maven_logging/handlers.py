@@ -83,7 +83,7 @@ def create_syslog_handler(
             # Try alternatives
             for path in syslog_paths:
                 is_valid = (
-                    isinstance(path, str) and Path(path).exists()
+                    (isinstance(path, str) and Path(path).exists())
                     or isinstance(path, tuple)
                 )
                 if is_valid:
