@@ -335,6 +335,9 @@ class ProcessController:
         Returns:
             ProcessResult indicating success or failure
         """
+        stdout_file = None
+        stderr_file = None
+
         try:
             cmd = [self.program_path]  # type: ignore
             if program_arguments:
@@ -350,9 +353,11 @@ class ProcessController:
             stderr = subprocess.DEVNULL
 
             if stdout_path:
-                stdout = open(stdout_path, "a")  # noqa: SIM115
+                stdout_file = open(stdout_path, "a")  # noqa: SIM115
+                stdout = stdout_file
             if stderr_path:
-                stderr = open(stderr_path, "a")  # noqa: SIM115
+                stderr_file = open(stderr_path, "a")  # noqa: SIM115
+                stderr = stderr_file
 
             # Start process
             process = subprocess.Popen(
@@ -379,6 +384,12 @@ class ProcessController:
                 success=False,
                 message=f"Failed to start daemon: {e}",
             )
+        finally:
+            # Close file handles - they are inherited by the child process
+            if stdout_file is not None:
+                stdout_file.close()
+            if stderr_file is not None:
+                stderr_file.close()
 
     def _stop_with_signal(self) -> ProcessResult:
         """Stop process using SIGTERM signal.

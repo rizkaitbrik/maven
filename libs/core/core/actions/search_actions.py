@@ -90,7 +90,12 @@ class SearchActions:
 
     @property
     def config(self):
-        """Get configuration, loading if necessary."""
+        """Get configuration, loading if necessary.
+
+        Note: Imports are inside the method to allow lazy loading of
+        dependencies and provide a fallback if config loading fails.
+        Config is cached after first access, so the import only happens once.
+        """
         if self._config is None:
             try:
                 from retrieval.services.config_manager import ConfigManager

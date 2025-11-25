@@ -1,5 +1,6 @@
 """macOS launchctl manager for process management."""
 
+import os
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -393,6 +394,4 @@ class LaunchctlManager:
         Returns:
             Current user's UID
         """
-        import os
-
         return os.getuid()
