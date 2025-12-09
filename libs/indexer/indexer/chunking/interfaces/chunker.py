@@ -1,7 +1,25 @@
 from typing import Protocol
 
+from libs.indexer.indexer.models.chunking import Chunk
+
 
 class Chunker(Protocol):
-    def chunk(self, document: str) -> list[str]:
-        ...
+    """Protocol for chunkers."""
 
+    def chunk(
+            self,
+            text: str,
+            doc_id: str,
+            metadata: dict[str, Any] | None = None,
+    ) -> list[Chunk]:
+        """Split text into chunks.
+
+        Args:
+            text: Text content to chunk
+            doc_id: Parent document ID
+            metadata: Metadata to attach to each chunk
+
+        Returns:
+            List of Chunk objects
+        """
+        ...

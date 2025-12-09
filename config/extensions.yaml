@@ -1,128 +1,263 @@
+# =============================================================================
+# CODE FILES
+# =============================================================================
 code_extensions_map:
-  - 'python': [ '.py', '.pyw', '.pyi', '.pyx', '.pxd' ]
+  # Python
+  - 'python': [ '.py', '.pyw', '.pyi', '.pyx', '.pxd', '.pxw' ]
+
+  # JavaScript / TypeScript
   - 'javascript': [ '.js', '.jsx', '.mjs', '.cjs' ]
   - 'typescript': [ '.ts', '.tsx', '.mts', '.cts' ]
-  - 'java': [ '.java', '.jar' ]
-  - 'csharp': [ '.cs', '.csx' ]
-  - 'cpp': [ '.cpp', '.cc', '.cxx', '.c', '.h', '.hpp', '.hxx', '.hh' ]
-  - 'ruby': [ '.rb', '.erb', '.rake', '.gemspec' ]
-  - 'go': [ '.go' ]
-  - 'php': [ '.php', '.phtml', '.php3', '.php4', '.php5' ]
-  - 'swift': [ '.swift' ]
+
+  # JVM Languages
+  - 'java': [ '.java' ]
   - 'kotlin': [ '.kt', '.kts' ]
-  - 'rust': [ '.rs' ]
-  - 'html': [ '.html', '.htm', '.xhtml' ]
-  - 'css': [ '.css', '.scss', '.sass', '.less', '.styl' ]
-  - 'shell': [ '.sh', '.bash', '.zsh', '.fish', '.ksh', '.csh' ]
-  - 'json': [ '.json', '.jsonc', '.json5' ]
-  - 'yaml': [ '.yaml', '.yml' ]
-  - 'xml': [ '.xml', '.xsl', '.xslt', '.svg', '.xaml' ]
-  - 'sql': [ '.sql', '.psql', '.plsql' ]
-  - 'csv': [ '.csv', '.tsv' ]
-  - 'markdown': [ '.md', '.mdx', '.markdown' ]
-  - 'scala': [ '.scala', '.sc' ]
+  - 'scala': [ '.scala', '.sc', '.sbt' ]
+  - 'groovy': [ '.groovy', '.gvy', '.gy', '.gsh' ]
   - 'clojure': [ '.clj', '.cljs', '.cljc', '.edn' ]
+
+  # C Family
+  - 'c': [ '.c' ]
+  - 'cpp': [ '.cpp', '.cc', '.cxx', '.c++', '.hpp', '.hh', '.hxx', '.h++', '.h' ]
+  - 'csharp': [ '.cs', '.csx' ]
+  - 'objective-c': [ '.m', '.mm' ]
+
+  # Systems Programming
+  - 'rust': [ '.rs' ]
+  - 'go': [ '.go' ]
+  - 'swift': [ '.swift' ]
+  - 'zig': [ '.zig' ]
+  - 'nim': [ '.nim', '.nims' ]
+  - 'ada': [ '.adb', '.ads' ]
+  - 'fortran': [ '.f', '.f90', '.f95', '.f03', '.f08', '.for', '.fpp' ]
+  - 'pascal': [ '.pas', '.pp', '.inc' ]
+  - 'd': [ '.d' ]
+
+  # Functional
   - 'haskell': [ '.hs', '.lhs' ]
   - 'elixir': [ '.ex', '.exs' ]
   - 'erlang': [ '.erl', '.hrl' ]
+  - 'ocaml': [ '.ml', '.mli' ]
+  - 'fsharp': [ '.fs', '.fsi', '.fsx', '.fsscript' ]
+  - 'lisp': [ '.lisp', '.lsp', '.cl', '.fasl' ]
+  - 'scheme': [ '.scm', '.ss' ]
+  - 'racket': [ '.rkt' ]
+
+  # Scripting
+  - 'ruby': [ '.rb', '.erb', '.rake', '.gemspec', '.ru' ]
+  - 'php': [ '.php', '.phtml', '.php3', '.php4', '.php5', '.php7', '.phps' ]
+  - 'perl': [ '.pl', '.pm', '.pod', '.t' ]
   - 'lua': [ '.lua' ]
-  - 'perl': [ '.pl', '.pm', '.pod' ]
-  - 'r': [ '.r', '.R', '.rmd' ]
+  - 'r': [ '.r', '.R', '.rmd', '.Rmd', '.rdata', '.rds' ]
   - 'julia': [ '.jl' ]
-  - 'dart': [ '.dart' ]
-  - 'vue': [ '.vue' ]
-  - 'svelte': [ '.svelte' ]
-  - 'graphql': [ '.graphql', '.gql' ]
-  - 'protobuf': [ '.proto' ]
-  - 'toml': [ '.toml' ]
-  - 'ini': [ '.ini', '.cfg', '.conf' ]
-  - 'dockerfile': [ 'Dockerfile', '.dockerfile' ]
-  - 'makefile': [ 'Makefile', '.mk' ]
-  - 'cmake': [ 'CMakeLists.txt', '.cmake' ]
-  - 'gradle': [ '.gradle', '.gradle.kts' ]
-  - 'terraform': [ '.tf', '.tfvars' ]
-  - 'puppet': [ '.pp' ]
-  - 'ansible': [ '.ansible' ]
-  - 'nginx': [ '.nginx', '.nginxconf' ]
-  - 'apache': [ '.htaccess', '.apacheconf' ]
+  - 'tcl': [ '.tcl' ]
+  - 'awk': [ '.awk' ]
+
+  # Shell
+  - 'shell': [ '.sh', '.bash', '.zsh', '.fish', '.ksh', '.csh', '.tcsh' ]
   - 'powershell': [ '.ps1', '.psm1', '.psd1' ]
   - 'batch': [ '.bat', '.cmd' ]
-  - 'vim': [ '.vim', '.vimrc' ]
-  - 'latex': [ '.tex', '.sty', '.cls', '.bib' ]
-  - 'solidity': [ '.sol' ]
-  - 'zig': [ '.zig' ]
-  - 'nim': [ '.nim' ]
-  - 'ocaml': [ '.ml', '.mli' ]
-  - 'fsharp': [ '.fs', '.fsi', '.fsx' ]
-  - 'assembly': [ '.asm', '.s' ]
-  - 'groovy': [ '.groovy', '.gvy' ]
-  - 'coffeescript': [ '.coffee' ]
-  - 'objective-c': [ '.m', '.mm' ]
-  - 'fortran': [ '.f', '.f90', '.f95', '.for' ]
-  - 'cobol': [ '.cbl', '.cob', '.cpy' ]
-  - 'pascal': [ '.pas', '.pp' ]
-  - 'ada': [ '.adb', '.ads' ]
-  - 'vhdl': [ '.vhd', '.vhdl' ]
-  - 'verilog': [ '.v', '.sv' ]
 
-raw_text_extensions_map:
-  - 'text': [ '.txt', '.text' ]
-  - 'log': [ '.log' ]
-  - 'readme': [ 'README', 'CHANGELOG', 'LICENSE', 'AUTHORS', 'CONTRIBUTORS' ]
-  - 'config': [ '.env', '.env.local', '.env.development', '.env.production' ]
-  - 'gitignore': [ '.gitignore', '.gitattributes', '.gitmodules' ]
-  - 'editorconfig': [ '.editorconfig' ]
-  - 'properties': [ '.properties' ]
-  - 'ascii': [ '.asc', '.ascii' ]
+  # Web Frontend
+  - 'html': [ '.html', '.htm', '.xhtml', '.shtml' ]
+  - 'css': [ '.css', '.scss', '.sass', '.less', '.styl', '.stylus' ]
+  - 'vue': [ '.vue' ]
+  - 'svelte': [ '.svelte' ]
+  - 'astro': [ '.astro' ]
+
+  # Data / Config Formats
+  - 'json': [ '.json', '.jsonc', '.json5', '.jsonl', '.geojson' ]
+  - 'yaml': [ '.yaml', '.yml' ]
+  - 'toml': [ '.toml' ]
+  - 'xml': [ '.xml', '.xsl', '.xslt', '.xsd', '.dtd', '.svg', '.xaml', '.plist' ]
+  - 'ini': [ '.ini', '.cfg', '.conf', '.cnf' ]
+  - 'csv': [ '.csv', '.tsv' ]
+
+  # Query / Database
+  - 'sql': [ '.sql', '.psql', '.plsql', '.mysql', '.pgsql' ]
+  - 'graphql': [ '.graphql', '.gql' ]
+
+  # Markup / Documentation
+  - 'markdown': [ '.md', '.mdx', '.markdown', '.mdown', '.mkd' ]
+  - 'latex': [ '.tex', '.sty', '.cls', '.bib', '.bst' ]
   - 'restructuredtext': [ '.rst' ]
-  - 'asciidoc': [ '.adoc', '.asciidoc' ]
+  - 'asciidoc': [ '.adoc', '.asciidoc', '.asc' ]
   - 'org': [ '.org' ]
 
+  # DevOps / IaC
+  - 'terraform': [ '.tf', '.tfvars', '.hcl' ]
+  - 'ansible': [ '.ansible' ]
+  - 'puppet': [ '.pp' ]
+  - 'nix': [ '.nix' ]
+
+  # Build Systems
+  - 'gradle': [ '.gradle', '.gradle.kts' ]
+  - 'cmake': [ '.cmake' ]
+  - 'make': [ '.mk' ]
+
+  # Hardware Description
+  - 'vhdl': [ '.vhd', '.vhdl' ]
+  - 'verilog': [ '.v', '.sv', '.svh' ]
+
+  # Other
+  - 'dart': [ '.dart' ]
+  - 'solidity': [ '.sol' ]
+  - 'protobuf': [ '.proto' ]
+  - 'thrift': [ '.thrift' ]
+  - 'avro': [ '.avsc', '.avdl' ]
+  - 'coffeescript': [ '.coffee', '.litcoffee' ]
+  - 'assembly': [ '.asm', '.s', '.S' ]
+  - 'cobol': [ '.cbl', '.cob', '.cpy' ]
+  - 'vim': [ '.vim' ]
+  - 'emacs': [ '.el', '.elc' ]
+
+# Filenames that are code (no extension or special names)
+code_filenames_map:
+  - 'dockerfile': [ 'Dockerfile', 'Dockerfile.*', 'dockerfile' ]
+  - 'makefile': [ 'Makefile', 'makefile', 'GNUmakefile' ]
+  - 'cmake': [ 'CMakeLists.txt' ]
+  - 'gradle': [ 'build.gradle', 'settings.gradle', 'build.gradle.kts', 'settings.gradle.kts' ]
+  - 'ruby': [ 'Gemfile', 'Rakefile', 'Guardfile', 'Vagrantfile' ]
+  - 'node': [ 'package.json', 'package-lock.json', 'tsconfig.json', 'jsconfig.json' ]
+  - 'python': [ 'Pipfile', 'pyproject.toml', 'setup.py', 'setup.cfg', 'requirements.txt' ]
+  - 'rust': [ 'Cargo.toml', 'Cargo.lock' ]
+  - 'go': [ 'go.mod', 'go.sum' ]
+  - 'docker': [ 'docker-compose.yml', 'docker-compose.yaml', 'compose.yml', 'compose.yaml' ]
+  - 'git': [ '.gitignore', '.gitattributes', '.gitmodules' ]
+  - 'editor': [ '.editorconfig', '.prettierrc', '.eslintrc', '.stylelintrc' ]
+  - 'ci': [ '.travis.yml', '.gitlab-ci.yml', 'Jenkinsfile', '.circleci/config.yml' ]
+
+# =============================================================================
+# RAW TEXT FILES
+# =============================================================================
+raw_text_extensions_map:
+  - 'text': [ '.txt', '.text' ]
+  - 'log': [ '.log', '.logs' ]
+  - 'ascii': [ '.asc', '.ascii', '.nfo', '.diz' ]
+
+raw_text_patterns_map:
+  - 'env': [ '.env*' ]
+  - 'readme': [ 'README*', 'CHANGELOG*', 'LICENSE*', 'AUTHORS*', 'CONTRIBUTORS*', 'HISTORY*', 'NOTICE*', 'COPYING*' ]
+
+# =============================================================================
+# RICH TEXT / DOCUMENTS
+# =============================================================================
 rich_text_extensions_map:
-  - 'word': [ '.doc', '.docx', '.docm' ]
-  - 'excel': [ '.xls', '.xlsx', '.xlsm', '.xlsb' ]
-  - 'powerpoint': [ '.ppt', '.pptx', '.pptm' ]
-  - 'pdf': [ '.pdf' ]
-  - 'rtf': [ '.rtf' ]
-  - 'odt': [ '.odt' ]
-  - 'ods': [ '.ods' ]
-  - 'odp': [ '.odp' ]
-  - 'odg': [ '.odg' ]
-  - 'epub': [ '.epub' ]
-  - 'mobi': [ '.mobi' ]
+  # Microsoft Office
+  - 'word': [ '.doc', '.docx', '.docm', '.dot', '.dotx', '.dotm' ]
+  - 'excel': [ '.xls', '.xlsx', '.xlsm', '.xlsb', '.xlt', '.xltx', '.xltm' ]
+  - 'powerpoint': [ '.ppt', '.pptx', '.pptm', '.pot', '.potx', '.potm', '.pps', '.ppsx' ]
+
+  # OpenDocument
+  - 'odt': [ '.odt', '.ott' ]
+  - 'ods': [ '.ods', '.ots' ]
+  - 'odp': [ '.odp', '.otp' ]
+  - 'odg': [ '.odg', '.otg' ]
+
+  # Apple iWork
   - 'pages': [ '.pages' ]
   - 'numbers': [ '.numbers' ]
   - 'keynote': [ '.key' ]
-  - 'xps': [ '.xps' ]
+
+  # PDF / Print
+  - 'pdf': [ '.pdf' ]
+  - 'xps': [ '.xps', '.oxps' ]
+  - 'ps': [ '.ps', '.eps' ]
+
+  # eBooks
+  - 'epub': [ '.epub' ]
+  - 'mobi': [ '.mobi', '.azw', '.azw3', '.kfx' ]
   - 'djvu': [ '.djvu' ]
+  - 'chm': [ '.chm' ]
 
+  # Other
+  - 'rtf': [ '.rtf' ]
+
+# =============================================================================
+# IMAGES
+# =============================================================================
 image_extensions_map:
-  - 'raster': [ '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.tiff', '.tif', '.ico', '.heic', '.heif' ]
-  - 'vector': [ '.svg', '.eps', '.ai' ]
-  - 'raw': [ '.raw', '.cr2', '.nef', '.arw', '.dng' ]
-  - 'psd': [ '.psd', '.psb' ]
+  - 'raster': [ '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.tiff', '.tif', '.ico', '.heic', '.heif', '.avif', '.jxl' ]
+  - 'vector': [ '.svg', '.eps', '.ai', '.pdf' ]
+  - 'raw': [ '.raw', '.cr2', '.cr3', '.nef', '.arw', '.dng', '.orf', '.rw2', '.pef', '.sr2' ]
+  - 'design': [ '.psd', '.psb', '.xcf', '.sketch', '.fig', '.xd' ]
 
+# =============================================================================
+# AUDIO
+# =============================================================================
 audio_extensions_map:
-  - 'compressed': [ '.mp3', '.aac', '.ogg', '.wma', '.m4a', '.opus' ]
-  - 'lossless': [ '.flac', '.wav', '.aiff', '.alac' ]
-  - 'midi': [ '.mid', '.midi' ]
+  - 'compressed': [ '.mp3', '.aac', '.ogg', '.oga', '.wma', '.m4a', '.opus', '.webm' ]
+  - 'lossless': [ '.flac', '.wav', '.aiff', '.aif', '.alac', '.ape', '.wv' ]
+  - 'midi': [ '.mid', '.midi', '.kar' ]
+  - 'tracker': [ '.mod', '.xm', '.it', '.s3m' ]
+  - 'playlist': [ '.m3u', '.m3u8', '.pls', '.cue' ]
 
+# =============================================================================
+# VIDEO
+# =============================================================================
 video_extensions_map:
-  - 'common': [ '.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm' ]
-  - 'professional': [ '.mxf', '.prores' ]
+  - 'common': [ '.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm', '.m4v', '.mpeg', '.mpg', '.3gp' ]
+  - 'professional': [ '.mxf', '.prores', '.dnxhd', '.r3d', '.braw' ]
+  - 'streaming': [ '.m3u8', '.ts', '.m2ts' ]
+  - 'subtitle': [ '.srt', '.sub', '.ass', '.ssa', '.vtt' ]
 
+# =============================================================================
+# ARCHIVES
+# =============================================================================
 archive_extensions_map:
-  - 'compressed': [ '.zip', '.tar', '.gz', '.tgz', '.bz2', '.xz', '.7z', '.rar' ]
-  - 'package': [ '.deb', '.rpm', '.dmg', '.pkg', '.msi', '.appimage' ]
+  - 'compressed': [ '.zip', '.tar', '.gz', '.tgz', '.bz2', '.xz', '.7z', '.rar', '.lz', '.lz4', '.zst' ]
+  - 'package': [ '.deb', '.rpm', '.dmg', '.pkg', '.msi', '.appimage', '.snap', '.flatpak' ]
+  - 'disk': [ '.iso', '.img', '.vhd', '.vmdk', '.qcow2' ]
+  - 'java': [ '.jar', '.war', '.ear' ]
 
+# =============================================================================
+# DATA FILES
+# =============================================================================
 data_extensions_map:
-  - 'database': [ '.db', '.sqlite', '.sqlite3', '.mdb', '.accdb' ]
-  - 'serialized': [ '.pickle', '.pkl', '.parquet', '.feather', '.arrow' ]
-  - 'binary': [ '.bin', '.dat' ]
+  # Databases
+  - 'sqlite': [ '.db', '.sqlite', '.sqlite3' ]
+  - 'access': [ '.mdb', '.accdb' ]
 
+  # Data Science
+  - 'serialized': [ '.pickle', '.pkl', '.joblib' ]
+  - 'columnar': [ '.parquet', '.feather', '.arrow', '.orc' ]
+  - 'hdf': [ '.h5', '.hdf5', '.hdf', '.nc', '.netcdf' ]
+
+  # Binary
+  - 'binary': [ '.bin', '.dat', '.data' ]
+
+  # Backup
+  - 'backup': [ '.bak', '.backup', '.old', '.orig' ]
+
+# =============================================================================
+# FONTS
+# =============================================================================
 font_extensions_map:
-  - 'font': [ '.ttf', '.otf', '.woff', '.woff2', '.eot' ]
+  - 'font': [ '.ttf', '.otf', '.woff', '.woff2', '.eot', '.fon', '.fnt' ]
 
+# =============================================================================
+# ML / 3D MODELS
+# =============================================================================
 model_extensions_map:
-  - 'ml': [ '.pt', '.pth', '.onnx', '.h5', '.keras', '.pb', '.safetensors', '.gguf', '.ggml' ]
-  - '3d': [ '.obj', '.fbx', '.gltf', '.glb', '.stl', '.blend' ]
+  # Machine Learning
+  - 'pytorch': [ '.pt', '.pth', '.bin' ]
+  - 'tensorflow': [ '.pb', '.h5', '.keras', '.tflite' ]
+  - 'onnx': [ '.onnx' ]
+  - 'safetensors': [ '.safetensors' ]
+  - 'ggml': [ '.gguf', '.ggml', '.bin' ]
+  - 'sklearn': [ '.joblib', '.pkl' ]
+
+  # 3D Models
+  - '3d_common': [ '.obj', '.fbx', '.gltf', '.glb', '.stl', '.dae', '.3ds' ]
+  - '3d_cad': [ '.step', '.stp', '.iges', '.igs' ]
+  - '3d_software': [ '.blend', '.max', '.ma', '.mb', '.c4d', '.skp' ]
+
+# =============================================================================
+# EXECUTABLES (typically skip these)
+# =============================================================================
+executable_extensions_map:
+  - 'windows': [ '.exe', '.dll', '.sys', '.com', '.scr' ]
+  - 'linux': [ '.so', '.a', '.o', '.ko' ]
+  - 'macos': [ '.dylib', '.app', '.framework' ]
+  - 'bytecode': [ '.pyc', '.pyo', '.class', '.beam' ]
+  - 'wasm': [ '.wasm', '.wat' ]
