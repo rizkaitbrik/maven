@@ -3,7 +3,7 @@
 from typing import Any
 
 from langchain_text_splitters import Language, RecursiveCharacterTextSplitter
-from libs.indexer.indexer.models.chunking import Chunk, ChunkingConfig
+from indexer.models.chunking import Chunk, ChunkingConfig
 
 # Map language names to LangChain Language enum
 LANGUAGE_MAP = {

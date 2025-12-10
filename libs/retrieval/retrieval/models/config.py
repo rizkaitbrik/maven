@@ -44,6 +44,42 @@ class DaemonConfig:
 
 
 @dataclass
+class EmbeddingConfig:
+    """Embedding configuration."""
+    provider: str = field(default="openai")
+    model: str = field(default="text-embedding-3-small")
+    batch_size: int = field(default=32)
+
+
+@dataclass
+class ChunkingConfig:
+    """Chunking configuration."""
+    chunk_size: int = field(default=1000)
+    chunk_overlap: int = field(default=150)
+    min_chunk_size: int = field(default=100)
+    max_chunk_size: int = field(default=2000)
+    use_ast_chunks: bool = field(default=True)
+
+
+@dataclass
+class ExtractionConfig:
+    """Extraction configuration."""
+    allowed_extensions: list[str] = field(default_factory=lambda: [".py", ".md", ".txt", ".js", ".ts"])
+    max_file_size: int = field(default=10485760)
+
+
+@dataclass
+class IndexerConfig:
+    """Semantic Indexer configuration."""
+    enabled: bool = field(default=True)
+    persist_directory: str = field(default="~/.maven/chroma")
+    collection_name: str = field(default="maven")
+    embedding: EmbeddingConfig = field(default_factory=EmbeddingConfig)
+    chunking: ChunkingConfig = field(default_factory=ChunkingConfig)
+    extraction: ExtractionConfig = field(default_factory=ExtractionConfig)
+
+
+@dataclass
 class RetrieverConfig:
     """Retriever configuration."""
     root: str = field(default=str(Path.home()))
@@ -55,6 +91,7 @@ class RetrieverConfig:
     hybrid_search: HybridSearchConfig = field(default_factory=HybridSearchConfig)
     logging: LoggingConfig = field(default_factory=LoggingConfig)
     daemon: DaemonConfig = field(default_factory=DaemonConfig)
+    indexer: IndexerConfig = field(default_factory=IndexerConfig)
 
     def __post_init__(self):
         self.root = Path(self.root)

@@ -1,6 +1,6 @@
-from typing import Protocol
+from typing import Protocol, Any
 
-from libs.indexer.indexer.models.chunking import Chunk
+from indexer.models.chunking import Chunk
 
 
 class Chunker(Protocol):

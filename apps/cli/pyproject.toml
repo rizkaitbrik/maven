@@ -30,6 +30,7 @@ dependencies = [
     "maven-logging",
     "pydantic>=2.12.4",
     "python-dotenv>=1.2.1",
+    "indexer",
 ]
 
 [project.scripts]
@@ -79,3 +80,6 @@ ignore = []
 
 fixable = ["ALL"]
 unfixable = []
+
+[tool.uv.sources]
+indexer = { workspace = true }

@@ -12,6 +12,7 @@ from rich.progress import (
     SpinnerColumn,
     TextColumn,
     TimeElapsedColumn,
+    TimeRemainingColumn
 )
 from rich.table import Table
 
@@ -20,11 +21,11 @@ console = Console()
 
 def index(
     root: str = typer.Option(None, help="Root directory to index (overrides config)"),
-    rebuild: bool = typer.Option(False, "--rebuild", help="Rebuild the entire index"),
+    rebuild: bool = typer.Option(False, "--rebuild", "--force", help="Rebuild the entire index (ignore modification times)"),
     stats: bool = typer.Option(False, "--stats", help="Show index statistics"),
     clear: bool = typer.Option(False, "--clear", help="Clear the index"),
 ):
-    """Manage the search index."""
+    """Manage the semantic search index."""
 
     # Load configuration
     try:
@@ -43,7 +44,7 @@ def index(
 
     # Handle clear command
     if clear:
-        if typer.confirm("Are you sure you want to clear the entire index?"):
+        if typer.confirm("Are you sure you want to clear the entire semantic index?"):
             result = actions.clear_index()
             console.print(f"[green]✓[/green] {result.message}")
         return
@@ -52,34 +53,21 @@ def index(
     if stats:
         index_stats = actions.get_stats()
 
-        table = Table(title="Index Statistics")
+        table = Table(title="Semantic Index Statistics")
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="magenta")
 
-        table.add_row("Files Indexed", str(index_stats.file_count))
-        table.add_row(
-            "Total Size", f"{index_stats.total_size_bytes / 1024 / 1024:.2f} MB"
-        )
-
-        if index_stats.last_indexed_at:
-            from datetime import datetime
-
-            last_indexed = datetime.fromtimestamp(index_stats.last_indexed_at)
-            table.add_row("Last Indexed", last_indexed.strftime("%Y-%m-%d %H:%M:%S"))
-        else:
-            table.add_row("Last Indexed", "Never")
-
+        table.add_row("Files/Chunks Indexed", str(index_stats.file_count))
         table.add_row("Database Path", index_stats.db_path)
-        table.add_row("Watcher Enabled", str(index_stats.watcher_enabled))
-
+        
         console.print(table)
         return
 
     # Start indexing
     if rebuild:
-        console.print("[yellow]Rebuilding entire index...[/yellow]")
+        console.print("[yellow]Rebuilding index (force update)...[/yellow]")
     else:
-        console.print("[yellow]Starting incremental indexing...[/yellow]")
+        console.print("[yellow]Synchronizing index (incremental update)...[/yellow]")
 
     # Track progress
     with Progress(
@@ -87,33 +75,31 @@ def index(
         TextColumn("[progress.description]{task.description}"),
         BarColumn(),
         TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+        TimeRemainingColumn(),
         TimeElapsedColumn(),
         console=console,
     ) as progress:
-        task = progress.add_task("Indexing files...", total=100)
+        task = progress.add_task("Scanning files...", total=None)
 
-        def progress_callback(current: int, total: int):
+        def progress_callback(current: int, total: int, message: str = ""):
             if total > 0:
-                percent = (current / total) * 100
-                desc = f"Indexed {current}/{total} files"
-                progress.update(task, completed=percent, description=desc)
+                progress.update(task, total=total, completed=current, description=message)
+            else:
+                 progress.update(task, completed=current, description=message)
 
-        # Start indexing
-        actions.start_indexing(
+        # Start indexing (synchronous)
+        result = actions.start_indexing(
             root=config.root,
             rebuild=rebuild,
             progress_callback=progress_callback,
         )
 
-        # Wait for completion
-        indexed, total = actions.wait_for_completion()
-
-    # Show final stats
-    console.print(f"\n[green]✓[/green] Indexing complete: {indexed} files indexed")
-
-    watcher_status = actions.get_watcher_status()
-    if watcher_status:
-        console.print("[green]✓[/green] File system watcher started")
-    else:
-        console.print("[yellow]⚠[/yellow] File system watcher not started")
+        if result.success:
+            data = result.data or {}
+            console.print(f"\n[green]✓[/green] Indexing complete!")
+            console.print(f"Scanned files: {data.get('total_files', 0)}")
+            console.print(f"Successfully indexed: {data.get('success_count', 0)}")
+            console.print(f"Total chunks generated: {data.get('total_chunks', 0)}")
+        else:
+            console.print(f"\n[red]Indexing failed: {result.message}[/red]")
 

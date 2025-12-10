@@ -5,7 +5,7 @@ from typing import Any, Protocol
 
 
 @dataclass
-class Chunk(Protocol):
+class Chunk:
     id: str
     content: str
     doc_id: str
@@ -40,7 +40,7 @@ class ChunkingConfig:
     min_chunk_size: int = 100
     max_chunk_size: int = 2000
     use_ast_chunks: bool = True
-    separators: list[str] = field(default_factory=lambda: lambda: [
+    separators: list[str] = field(default_factory=lambda: [
         "\n\n",     # Paragraphs
         "\n",       # Lines
         ". ",       # Sentences

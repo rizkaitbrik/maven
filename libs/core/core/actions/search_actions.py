@@ -24,6 +24,7 @@ class SearchResult:
         snippet: Optional content snippet
         line_number: Optional line number for content matches
         match_type: Type of match (filename, content, or both)
+        metadata: Additional metadata (AST, etc.)
     """
 
     path: str
@@ -31,6 +32,7 @@ class SearchResult:
     snippet: str | None = None
     line_number: int | None = None
     match_type: str | None = None
+    metadata: dict | None = None
 
 
 @dataclass
@@ -162,6 +164,7 @@ class SearchActions:
                 snippet=r.snippet,
                 line_number=r.line_number,
                 match_type=r.match_type.value if r.match_type else None,
+                metadata=r.metadata,
             )
             for r in response.results
         ]
@@ -269,18 +272,33 @@ class SearchActions:
         Returns:
             New adapter instance
         """
+        # We need the semantic indexer for content/hybrid search
+        indexer = None
+        if search_type in (SearchType.CONTENT, SearchType.HYBRID):
+             from core.actions.index_actions import IndexActions
+             # Use IndexActions to get the configured indexer
+             # This ensures we share the same Chroma configuration
+             index_actions = IndexActions(config=self.config)
+             indexer = index_actions.semantic_indexer
+
         if search_type == SearchType.FILENAME:
             from retrieval.adapters.spotlight import SpotlightAdapter
 
             return SpotlightAdapter(self.root, config=self.config)
         elif search_type == SearchType.CONTENT:
-            from retrieval.adapters.content_search import ContentSearchAdapter
+            from core.adapters.semantic_search_adapter import SemanticSearchAdapter
 
-            return ContentSearchAdapter(self.root, config=self.config)
+            return SemanticSearchAdapter(indexer=indexer)
         elif search_type == SearchType.HYBRID:
             from retrieval.adapters.hybrid_search import HybridSearchAdapter
+            from core.adapters.semantic_search_adapter import SemanticSearchAdapter
 
-            return HybridSearchAdapter(self.root, config=self.config)
+            content_searcher = SemanticSearchAdapter(indexer=indexer)
+            return HybridSearchAdapter(
+                self.root, 
+                config=self.config, 
+                content_searcher=content_searcher
+            )
         else:
             raise ValueError(f"Unknown search type: {search_type}")
 
@@ -289,12 +307,32 @@ class SearchActions:
         if not self.config.index.auto_index_on_search:
             return
 
-        from retrieval.services.background_indexer import BackgroundIndexer
-        from retrieval.services.index_manager import IndexManager
-
-        index_manager = IndexManager(self.config.index, self.config.text_extensions)
-        stats = index_manager.get_stats()
-
-        if stats.get("file_count", 0) == 0:
-            indexer = BackgroundIndexer(index_manager, self.config)
-            indexer.start_indexing(self.root)
+        from core.actions.index_actions import IndexActions
+        
+        index_actions = IndexActions(config=self.config)
+        # Check if index is empty using semantic indexer stats (approximate via file count or just checking if any docs exist)
+        # Since getting exact count from Chroma might be slow, we can check if collection is empty
+        # or just rely on the fact that if it's empty, we should index.
+        # But for now let's just trigger start_indexing which handles skipping if needed?
+        # Actually start_indexing in semantic indexer isn't fully "skip if done" yet, it scans.
+        # The prompt asked for auto-index if empty.
+        
+        # We can try to get count
+        try:
+            if hasattr(index_actions.semantic_indexer.store, "_collection"):
+                 count = index_actions.semantic_indexer.store._collection.count()
+                 if count == 0:
+                     # It's empty, populate it
+                     # Note: This is synchronous in CLI but we might want it backgrounded
+                     # For now, we'll just run it (might block first search)
+                     # Or we can spin up a thread.
+                     # Original implementation used BackgroundIndexer.
+                     # We should probably use a background thread here too.
+                     import threading
+                     
+                     def run_index():
+                         index_actions.start_indexing(self.root, recursive=True)
+                         
+                     threading.Thread(target=run_index, daemon=True).start()
+        except Exception:
+            pass

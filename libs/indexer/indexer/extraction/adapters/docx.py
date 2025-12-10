@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from langchain_community.document_loaders import Docx2txtLoader
-from libs.indexer.indexer.extraction.models.extraction_result import ExtractionResult
+from indexer.extraction.models.extraction_result import ExtractionResult
 
 
 class DocxExtractor:

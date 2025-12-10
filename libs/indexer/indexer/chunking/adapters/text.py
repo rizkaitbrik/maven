@@ -3,7 +3,7 @@
 from typing import Any
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from libs.indexer.indexer.models.chunking import Chunk, ChunkingConfig
+from indexer.models.chunking import Chunk, ChunkingConfig
 
 
 class TextChunker:

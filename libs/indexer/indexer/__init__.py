@@ -3,7 +3,7 @@ from langchain_core.embeddings import Embeddings
 from langchain_core.vectorstores import VectorStore
 
 # Chunking
-from libs.indexer.indexer.models.chunking import (
+from indexer.models.chunking import (
     Chunk,
     ChunkingConfig,
 )

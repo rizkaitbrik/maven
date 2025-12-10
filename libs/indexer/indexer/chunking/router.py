@@ -2,9 +2,9 @@
 
 from typing import Any
 
-from libs.indexer.indexer.chunking.adapters.code import CodeChunker
-from libs.indexer.indexer.chunking.adapters.text import TextChunker
-from libs.indexer.indexer.models.chunking import Chunk, ChunkingConfig
+from indexer.chunking.adapters.code import CodeChunker
+from indexer.chunking.adapters.text import TextChunker
+from indexer.models.chunking import Chunk, ChunkingConfig
 
 
 class ChunkingRouter:

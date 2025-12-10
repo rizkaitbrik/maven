@@ -23,6 +23,11 @@ block_list:
   - "**/build/**"
   - "**/.next/**"
   - "**/.cache/**"
+  - "**/.env/**"
+  - "**/.nx/**"
+  - "**/.ruff_cache/**"
+  - "**/.cursor/**"
+  - "**/.pytest_cache/**"
 
 # Text file extensions for content extraction
 text_extensions:

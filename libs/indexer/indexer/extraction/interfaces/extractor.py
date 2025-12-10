@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Protocol
 
-from libs.indexer.indexer.extraction.models.extraction_result import ExtractionResult
+from indexer.extraction.models.extraction_result import ExtractionResult
 
 
 class Extractor(Protocol):

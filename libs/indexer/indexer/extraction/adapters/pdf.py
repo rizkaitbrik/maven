@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from langchain_community.document_loaders import PyMuPDFLoader
-from libs.indexer.indexer.extraction.models.extraction_result import ExtractionResult
+from indexer.extraction.models.extraction_result import ExtractionResult
 
 
 class PDFExtractor:

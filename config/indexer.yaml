@@ -1,0 +1,35 @@
+# Maven Semantic Indexer Configuration
+
+# General settings
+enabled: true
+persist_directory: "~/.maven/chroma"
+collection_name: "maven"
+
+# Embedding configuration
+embedding:
+  provider: "huggingface"  # openai, huggingface, ollama
+  model: "sentence-transformers/all-MiniLM-L6-v2"
+  # batch_size: 32
+
+# Chunking configuration
+chunking:
+  chunk_size: 1000
+  chunk_overlap: 150
+  min_chunk_size: 100
+  max_chunk_size: 2000
+  use_ast_chunks: true
+
+# Extraction configuration
+extraction:
+  allowed_extensions:
+    - ".py"
+    - ".md"
+    - ".txt"
+    - ".js"
+    - ".ts"
+    - ".rst"
+    - ".proto"
+  
+  # Max file size in bytes (10MB)
+  max_file_size: 10485760
+
