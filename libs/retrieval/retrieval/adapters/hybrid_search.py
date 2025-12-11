@@ -4,7 +4,7 @@ import asyncio
 from pathlib import Path
 from collections import defaultdict
 from retrieval.adapters.spotlight import SpotlightAdapter
-from retrieval.adapters.indexed_content_search import IndexedContentSearchAdapter
+from retrieval.interfaces.retriever import Retriever
 from retrieval.models.search import SearchRequest, SearchResponse, SearchResult, MatchType
 from retrieval.models.config import RetrieverConfig
 
@@ -12,19 +12,26 @@ from retrieval.models.config import RetrieverConfig
 class HybridSearchAdapter:
     """Combines Spotlight filename search and FTS content search with weighted ranking."""
 
-    def __init__(self, root: Path | None = None, config: RetrieverConfig | None = None):
+    def __init__(self, root: Path | None = None, config: RetrieverConfig | None = None, content_searcher: Retriever | None = None):
         """Initialize hybrid search adapter.
         
         Args:
             root: Root directory to search from
             config: Retriever configuration
+            content_searcher: Optional retriever implementation for content search
         """
         self.root = root or Path.home()
         self.config = config or RetrieverConfig()
         
         # Initialize both search adapters
         self.spotlight = SpotlightAdapter(root, config)
-        self.content_search = IndexedContentSearchAdapter(root, config)
+        
+        if content_searcher:
+            self.content_search = content_searcher
+        else:
+            # Fallback to legacy adapter if not provided
+            from retrieval.adapters.indexed_content_search import IndexedContentSearchAdapter
+            self.content_search = IndexedContentSearchAdapter(root, config)
         
         # Get hybrid search config
         self.hybrid_config = self.config.hybrid_search
@@ -203,7 +210,11 @@ class HybridSearchAdapter:
             Dictionary with stats from both search methods
         """
         try:
-            content_stats = self.content_search.get_stats()
+            # Only try to get stats if the method exists (legacy adapter)
+            if hasattr(self.content_search, "get_stats"):
+                content_stats = self.content_search.get_stats()
+            else:
+                content_stats = {"type": self.content_search.__class__.__name__}
         except Exception as e:
             content_stats = {"error": str(e)}
         

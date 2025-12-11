@@ -2,13 +2,13 @@
 name = "maven"
 version = "0.1.0"
 requires-python = ">=3.12"
-dependencies = [ "cli", "daemon", "maven-logging" ]
+dependencies = [ "cli", "daemon", "indexer", "library", "maven-logging", "ml" ]
 
 [tool.uv]
 dev-dependencies = [ ]
 
   [tool.uv.workspace]
-  members = [ "apps/*", "apps/daemon", "libs/*", "libs/logging" ]
+  members = [ "apps/*", "libs/*", "libs/ml" ]
 
 [tool.uv.sources.api]
 workspace = true
@@ -22,7 +22,13 @@ workspace = true
 [tool.uv.sources.daemon]
 workspace = true
 
+[tool.uv.sources.indexer]
+workspace = true
+
 [tool.uv.sources.maven-logging]
+workspace = true
+
+[tool.uv.sources.ml]
 workspace = true
 
 [tool.uv.sources.retrieval]

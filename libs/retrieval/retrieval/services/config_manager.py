@@ -6,7 +6,11 @@ from retrieval.models.config import (
     IndexConfig,
     HybridSearchConfig,
     LoggingConfig,
-    DaemonConfig
+    DaemonConfig,
+    IndexerConfig,
+    EmbeddingConfig,
+    ChunkingConfig,
+    ExtractionConfig
 )
 
 try:
@@ -32,9 +36,19 @@ class ConfigManager:
         retriever_config_path = os.getenv("RETRIEVER_CONFIG_PATH")
         if not retriever_config_path:
             # Default to config/retriever_config.yaml in project root
-            retriever_config_path = "config/retriever_config.yaml"
+            # Check for both yaml and yml
+            if Path("config/retriever.yaml").exists():
+                retriever_config_path = "config/retriever.yaml"
+            else:
+                retriever_config_path = "config/retriever_config.yaml"
         
         self.config_path = Path(retriever_config_path)
+        
+        # Indexer config path
+        indexer_config_path = os.getenv("INDEXER_CONFIG_PATH")
+        if not indexer_config_path:
+            indexer_config_path = "config/indexer.yaml"
+        self.indexer_config_path = Path(indexer_config_path)
         
         # Load environment-based allowed list
         self.env_allowed_list = self._load_env_allowed_list()
@@ -52,6 +66,7 @@ class ConfigManager:
     def load_config(self) -> RetrieverConfig:
         config_data = {}
         
+        # 1. Load Retriever Config
         if self.config_path.exists():
             with open(self.config_path, "r") as f:
                 if self.config_path.suffix in [".yaml", ".yml"] and yaml:
@@ -59,6 +74,18 @@ class ConfigManager:
                 else:
                     config_data = json.load(f)
         
+        # 2. Load Indexer Config and merge it
+        if self.indexer_config_path.exists():
+            with open(self.indexer_config_path, "r") as f:
+                indexer_data = {}
+                if self.indexer_config_path.suffix in [".yaml", ".yml"] and yaml:
+                    indexer_data = yaml.safe_load(f) or {}
+                else:
+                    indexer_data = json.load(f)
+                
+                if indexer_data:
+                    config_data["indexer"] = indexer_data
+
         # Merge environment-based allowed list with config file
         if self.env_allowed_list:
             file_allowed_list = config_data.get("allowed_list", [])
@@ -76,10 +103,26 @@ class ConfigManager:
         
         if "daemon" in config_data and isinstance(config_data["daemon"], dict):
             config_data["daemon"] = DaemonConfig(**config_data["daemon"])
+
+        # Parse Indexer Config
+        if "indexer" in config_data and isinstance(config_data["indexer"], dict):
+            idx_data = config_data["indexer"]
+            
+            if "embedding" in idx_data and isinstance(idx_data["embedding"], dict):
+                idx_data["embedding"] = EmbeddingConfig(**idx_data["embedding"])
+            
+            if "chunking" in idx_data and isinstance(idx_data["chunking"], dict):
+                idx_data["chunking"] = ChunkingConfig(**idx_data["chunking"])
+                
+            if "extraction" in idx_data and isinstance(idx_data["extraction"], dict):
+                idx_data["extraction"] = ExtractionConfig(**idx_data["extraction"])
+                
+            config_data["indexer"] = IndexerConfig(**idx_data)
         
         return RetrieverConfig(**config_data) if config_data else RetrieverConfig()
 
     def save_config(self, config: RetrieverConfig):
+        # Save Retriever Config
         data = {
             "root": str(config.root),
             "index_path": str(config.index_path),
@@ -107,3 +150,7 @@ class ConfigManager:
                 yaml.safe_dump(data, f, default_flow_style=False)
             else:
                 json.dump(data, f, indent=2)
+
+        # Save Indexer Config (if needed separately)
+        # For now, we only read indexer config from file, assuming it's managed there.
+        # If we need to write back indexer changes, we would do it here.

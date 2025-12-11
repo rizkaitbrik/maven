@@ -9,8 +9,8 @@ index_path: "~/.maven/index.json"
 # Allowed directories to search (empty = search all)
 # Patterns: absolute paths, relative paths, glob patterns
 allowed_list:
-  # - "**Downloads/**"
-  # - "/Users/username/Documents/**"
+# - "**Downloads/**"
+# - "/Users/username/Documents/**"
 
 # Blocked directories to exclude from search
 block_list:
@@ -23,6 +23,11 @@ block_list:
   - "**/build/**"
   - "**/.next/**"
   - "**/.cache/**"
+  - "**/.env/**"
+  - "**/.nx/**"
+  - "**/.ruff_cache/**"
+  - "**/.cursor/**"
+  - "**/.pytest_cache/**"
 
 # Text file extensions for content extraction
 text_extensions:
@@ -72,7 +77,7 @@ index:
 # Hybrid search configuration
 hybrid_search:
   enabled: true
-  filename_match_weight: 2.0
+  filename_match_weight: 1.0
   content_match_weight: 1.0
   deduplicate: true
 

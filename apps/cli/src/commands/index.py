@@ -1,25 +1,32 @@
 """Index management commands."""
 
-import typer
 from pathlib import Path
-from rich.console import Console
-from rich.table import Table
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
+
+import typer
+from core.actions import IndexActions
 from retrieval.services.config_manager import ConfigManager
-from retrieval.services.index_manager import IndexManager
-from retrieval.services.background_indexer import BackgroundIndexer
+from rich.console import Console
+from rich.progress import (
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TextColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn
+)
+from rich.table import Table
 
 console = Console()
 
 
 def index(
     root: str = typer.Option(None, help="Root directory to index (overrides config)"),
-    rebuild: bool = typer.Option(False, "--rebuild", help="Rebuild the entire index"),
+    rebuild: bool = typer.Option(False, "--rebuild", "--force", help="Rebuild the entire index (ignore modification times)"),
     stats: bool = typer.Option(False, "--stats", help="Show index statistics"),
     clear: bool = typer.Option(False, "--clear", help="Clear the index"),
 ):
-    """Manage the search index."""
-    
+    """Manage the semantic search index."""
+
     # Load configuration
     try:
         config_manager = ConfigManager()
@@ -27,89 +34,72 @@ def index(
     except Exception as e:
         console.print(f"[red]Error loading config: {e}[/red]")
         return
-    
+
     # Override root if specified
     if root:
         config.root = Path(root)
-    
-    # Initialize index manager
-    index_manager = IndexManager(config.index, config.text_extensions)
-    
+
+    # Initialize index actions with config
+    actions = IndexActions(config=config)
+
     # Handle clear command
     if clear:
-        if typer.confirm("Are you sure you want to clear the entire index?"):
-            index_manager.clear()
-            console.print("[green]✓[/green] Index cleared")
+        if typer.confirm("Are you sure you want to clear the entire semantic index?"):
+            result = actions.clear_index()
+            console.print(f"[green]✓[/green] {result.message}")
         return
-    
+
     # Handle stats command
     if stats:
-        index_stats = index_manager.get_stats()
-        
-        table = Table(title="Index Statistics")
+        index_stats = actions.get_stats()
+
+        table = Table(title="Semantic Index Statistics")
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="magenta")
-        
-        table.add_row("Files Indexed", str(index_stats['file_count']))
-        table.add_row("Total Size", f"{index_stats['total_size_bytes'] / 1024 / 1024:.2f} MB")
-        
-        if index_stats['last_indexed_at']:
-            from datetime import datetime
-            last_indexed = datetime.fromtimestamp(index_stats['last_indexed_at'])
-            table.add_row("Last Indexed", last_indexed.strftime('%Y-%m-%d %H:%M:%S'))
-        else:
-            table.add_row("Last Indexed", "Never")
-        
-        table.add_row("Database Path", index_stats['db_path'])
-        table.add_row("Watcher Enabled", str(config.index.enable_watcher))
+
+        table.add_row("Files/Chunks Indexed", str(index_stats.file_count))
+        table.add_row("Database Path", index_stats.db_path)
         
         console.print(table)
         return
-    
+
     # Start indexing
-    indexer = BackgroundIndexer(index_manager, config)
-    
     if rebuild:
-        console.print("[yellow]Rebuilding entire index...[/yellow]")
+        console.print("[yellow]Rebuilding index (force update)...[/yellow]")
     else:
-        console.print("[yellow]Starting incremental indexing...[/yellow]")
-    
+        console.print("[yellow]Synchronizing index (incremental update)...[/yellow]")
+
     # Track progress
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
         BarColumn(),
         TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+        TimeRemainingColumn(),
         TimeElapsedColumn(),
-        console=console
+        console=console,
     ) as progress:
-        
-        task = progress.add_task("Indexing files...", total=100)
-        
-        def progress_callback(current: int, total: int):
+        task = progress.add_task("Scanning files...", total=None)
+
+        def progress_callback(current: int, total: int, message: str = ""):
             if total > 0:
-                percent = (current / total) * 100
-                progress.update(task, completed=percent, description=f"Indexed {current}/{total} files")
-        
-        # Start indexing
-        indexer.start_indexing(
+                progress.update(task, total=total, completed=current, description=message)
+            else:
+                 progress.update(task, completed=current, description=message)
+
+        # Start indexing (synchronous)
+        result = actions.start_indexing(
             root=config.root,
             rebuild=rebuild,
-            progress_callback=progress_callback
+            progress_callback=progress_callback,
         )
-        
-        # Wait for completion
-        while indexer.is_indexing():
-            import time
-            time.sleep(0.1)
-    
-    # Show final stats
-    indexed, total = indexer.get_progress()
-    console.print(f"\n[green]✓[/green] Indexing complete: {indexed} files indexed")
-    
-    if config.index.enable_watcher:
-        if indexer.get_watcher_status():
-            console.print("[green]✓[/green] File system watcher started")
+
+        if result.success:
+            data = result.data or {}
+            console.print(f"\n[green]✓[/green] Indexing complete!")
+            console.print(f"Scanned files: {data.get('total_files', 0)}")
+            console.print(f"Successfully indexed: {data.get('success_count', 0)}")
+            console.print(f"Total chunks generated: {data.get('total_chunks', 0)}")
         else:
-            console.print("[yellow]⚠[/yellow] File system watcher not started")
+            console.print(f"\n[red]Indexing failed: {result.message}[/red]")
 

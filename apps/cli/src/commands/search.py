@@ -1,19 +1,18 @@
-import asyncio
-import typer
+import json as json_lib
 from pathlib import Path
+
+import typer
+from core.actions import SearchActions
+from core.actions.search_actions import SearchType
+from retrieval.services.config_manager import ConfigManager
 from rich.console import Console
+from rich.panel import Panel
 from rich.table import Table
 from rich.syntax import Syntax
-from rich.panel import Panel
-from retrieval.adapters.spotlight import SpotlightAdapter
-from retrieval.adapters.content_search import ContentSearchAdapter
-from retrieval.adapters.hybrid_search import HybridSearchAdapter
-from retrieval.models.search import SearchRequest, MatchType
-from retrieval.services.config_manager import ConfigManager
-from retrieval.services.background_indexer import BackgroundIndexer
-from retrieval.services.index_manager import IndexManager
+from rich.text import Text
 
 console = Console()
+
 
 def search(
     query: str = typer.Argument(..., help="Search query or pattern"),
@@ -21,11 +20,9 @@ def search(
     limit: int = typer.Option(10, help="Max results per page"),
     page: int = typer.Option(1, help="Page number"),
     json: bool = typer.Option(False, help="Output as JSON"),
-    content: bool = typer.Option(False, "--content", "-c", help="Search inside file contents"),
-    hybrid: bool = typer.Option(False, "--hybrid", "-h", help="Use hybrid search (Spotlight + indexed content)")
 ):
-    """Search files using platform-native indexing, content search, or hybrid mode."""
-    
+    """Search files using hybrid search (Spotlight + Semantic Content)."""
+
     # Load configuration from config file and environment
     try:
         config_manager = ConfigManager()
@@ -34,103 +31,113 @@ def search(
         console.print(f"[yellow]Warning: Could not load config: {e}[/yellow]")
         console.print("[yellow]Using default configuration...[/yellow]")
         from retrieval.models.config import RetrieverConfig
-        config = RetrieverConfig()
-    
-    # Override root if specified via CLI
-    if root:
-        config.root = Path(root)
-    
-    # Choose adapter based on search type
-    if hybrid:
-        adapter = HybridSearchAdapter(config.root, config=config)
-        search_type = "hybrid"
-        
-        # Start background indexing if needed
-        if config.index.auto_index_on_search:
-            index_manager = IndexManager(config.index, config.text_extensions)
-            stats = index_manager.get_stats()
-            
-            if stats['file_count'] == 0:
-                console.print("[yellow]Index is empty, starting background indexing...[/yellow]")
-                indexer = BackgroundIndexer(index_manager, config)
-                indexer.start_indexing(config.root)
-    elif content:
-        adapter = ContentSearchAdapter(config.root, config=config)
-        search_type = "content"
-    else:
-        adapter = SpotlightAdapter(config.root, config=config)
-        search_type = "filename"
-    
-    request = SearchRequest(query=query, page=page, size=limit, config=config)
 
-    response = asyncio.run(adapter.search(request))
+        config = RetrieverConfig()
+
+    # Override root if specified via CLI
+    search_root = Path(root) if root else config.root
+
+    # Initialize search actions
+    actions = SearchActions(config=config, root=search_root)
+
+    # Use Hybrid Search by default
+    search_type = SearchType.HYBRID
+    search_label = "Hybrid Search"
+
+    # Execute search
+    # auto_index=True is handled by SearchActions if config allows
+    response = actions.search(
+        query=query,
+        search_type=search_type,
+        page=page,
+        size=limit,
+        auto_index=True, 
+    )
 
     if json:
-        import json as json_lib
         results_data = []
         for r in response.results:
-            result_dict = {"path": r.path, "score": r.score}
+            result_dict = {
+                "path": r.path, 
+                "score": r.score,
+                "match_type": r.match_type,
+            }
             if r.snippet:
                 result_dict["snippet"] = r.snippet
-            if r.line_number:
-                result_dict["line_number"] = r.line_number
-            if r.match_type:
-                result_dict["match_type"] = r.match_type.value
+            if r.metadata:
+                 result_dict["metadata"] = r.metadata
+            
             results_data.append(result_dict)
-        
-        print(json_lib.dumps({
-            "query": response.query,
-            "page": response.page,
-            "size": response.size,
-            "total": response.total,
-            "search_type": search_type,
-            "results": results_data
-        }, indent=2))
+
+        print(
+            json_lib.dumps(
+                {
+                    "query": response.query,
+                    "page": response.page,
+                    "size": response.size,
+                    "total": response.total,
+                    "search_type": search_type.value,
+                    "results": results_data,
+                },
+                indent=2,
+            )
+        )
     else:
         # Show pagination info
-        total_pages = (response.total + limit - 1) // limit if limit > 0 else 1
-        if hybrid:
-            search_label = "Hybrid Search"
-        elif content:
-            search_label = "Content Search"
-        else:
-            search_label = "File Search"
-        title = f"{search_label}: '{query}' (Page {page}/{total_pages}, {response.total} total)"
+        # Note: Hybrid/Semantic search often doesn't give precise total count efficiently
+        # So we might just show "Results" or "Page X"
+        total_str = f"{response.total} total" if response.total > 0 else "found"
+        title = f"{search_label}: '{query}' (Page {page}, {total_str})"
         
-        if content:
-            # For content search, show snippets
-            console.print(f"\n[bold]{title}[/bold]\n")
+        console.print(f"\n[bold]{title}[/bold]\n")
+
+        if not response.results:
+             console.print("[dim]No results found.[/dim]")
+             return
+
+        for i, r in enumerate(response.results, start=1):
+            # 1. Header: Path + Match Type + Score
+            path_text = Text(r.path, style="cyan underline")
             
-            for i, r in enumerate(response.results, start=1):
-                # Header with file path and line number
-                header = f"[cyan]{r.path}[/cyan]"
-                if r.line_number:
-                    header += f" [dim](Line {r.line_number})[/dim]"
-                
-                console.print(f"\n{i}. {header}")
-                
-                # Display snippet if available
-                if r.snippet:
-                    # Create a panel for the snippet
-                    console.print(Panel(
-                        r.snippet,
-                        border_style="dim",
-                        padding=(0, 1)
-                    ))
-        else:
-            # For filename search, show table
-            table = Table(title=title)
-            table.add_column("Path", style="cyan", no_wrap=False)
-            table.add_column("Score", justify="right", style="magenta")
+            meta_info = []
+            if r.match_type:
+                 meta_info.append(f"[{r.match_type}]")
+            
+            # AST Context from metadata
+            if r.metadata and "ast_context" in r.metadata:
+                 ast_ctx = r.metadata["ast_context"]
+                 meta_info.append(f"[bold magenta]{ast_ctx}[/bold magenta]")
 
-            for r in response.results:
-                table.add_row(r.path, f"{r.score:.3f}")
+            meta_info.append(f"(score: {r.score:.2f})")
+            
+            header = Text(f"{i}. ") + path_text + Text(" " + " ".join(meta_info), style="dim")
+            console.print(header)
 
-            console.print(table)
-        
+            # 2. Snippet
+            if r.snippet:
+                # Determine language for syntax highlighting
+                language = "text"
+                if r.metadata and "language" in r.metadata:
+                     language = r.metadata["language"]
+                elif r.path.endswith(".py"):
+                     language = "python"
+                elif r.path.endswith(".ts"):
+                     language = "typescript"
+                
+                # Show snippet in panel
+                snippet_content = r.snippet.strip()
+                if not snippet_content:
+                    continue
+                    
+                syntax = Syntax(snippet_content, language, theme="monokai", line_numbers=False, word_wrap=True)
+                console.print(Panel(syntax, border_style="dim", padding=(0, 1)))
+            
+            console.print("") # Spacer
+
         # Show navigation hints
-        mode_flag = " --hybrid" if hybrid else (" --content" if content else "")
-        if page < total_pages:
-            console.print(f"\n[dim]Next page: maven search \"{query}\"{mode_flag} --page {page + 1}[/dim]")
+        if response.results and len(response.results) >= limit:
+            next_hint = f'maven search "{query}" --page {page + 1}'
+            console.print(f"[dim]Next page: {next_hint}[/dim]")
         if page > 1:
-            console.print(f"[dim]Previous page: maven search \"{query}\"{mode_flag} --page {page - 1}[/dim]")
+            prev_hint = f'maven search "{query}" --page {page - 1}'
+            console.print(f"[dim]Previous page: {prev_hint}[/dim]")

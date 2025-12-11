@@ -24,6 +24,9 @@ readme = 'README.md'
 dependencies = [
     "grpcio>=1.60.0",
     "grpcio-tools>=1.60.0",
+    "indexer",
+    "langchain-huggingface>=1.1.0",
+    "sentence-transformers>=5.1.2",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -67,3 +70,6 @@ ignore = []
 
 fixable = ["ALL"]
 unfixable = []
+
+[tool.uv.sources]
+indexer = { workspace = true }

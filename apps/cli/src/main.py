@@ -10,6 +10,7 @@ app = typer.Typer(
     add_completion=False
 )
 
+
 # Daemon subcommand group
 daemon_app = typer.Typer(help="Manage Maven daemon")
 daemon_app.command(name="start")(daemon_cmd.start)
