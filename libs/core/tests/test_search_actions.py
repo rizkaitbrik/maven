@@ -3,7 +3,7 @@
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from core.actions.search_actions import (
+from core.actions.search import (
     SearchActions,
     SearchResponse,
     SearchResult,

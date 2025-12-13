@@ -12,7 +12,7 @@ from rich.progress import (
     SpinnerColumn,
     TextColumn,
     TimeElapsedColumn,
-    TimeRemainingColumn
+    TimeRemainingColumn,
 )
 from rich.table import Table
 
@@ -51,7 +51,7 @@ def index(
 
     # Handle stats command
     if stats:
-        index_stats = actions.get_stats()
+        index_stats = actions.get_stats
 
         table = Table(title="Semantic Index Statistics")
         table.add_column("Metric", style="cyan")
@@ -96,7 +96,7 @@ def index(
 
         if result.success:
             data = result.data or {}
-            console.print(f"\n[green]✓[/green] Indexing complete!")
+            console.print("\n[green]✓[/green] Indexing complete!")
             console.print(f"Scanned files: {data.get('total_files', 0)}")
             console.print(f"Successfully indexed: {data.get('success_count', 0)}")
             console.print(f"Total chunks generated: {data.get('total_chunks', 0)}")

@@ -1,74 +1,9 @@
 """Search actions."""
 
 import asyncio
-from dataclasses import dataclass
-from enum import Enum
 from pathlib import Path
 
-
-class SearchType(str, Enum):
-    """Type of search to perform."""
-
-    FILENAME = "filename"
-    CONTENT = "content"
-    HYBRID = "hybrid"
-
-
-@dataclass
-class SearchResult:
-    """Single search result.
-
-    Attributes:
-        path: Path to the matched file
-        score: Relevance score
-        snippet: Optional content snippet
-        line_number: Optional line number for content matches
-        match_type: Type of match (filename, content, or both)
-        metadata: Additional metadata (AST, etc.)
-    """
-
-    path: str
-    score: float
-    snippet: str | None = None
-    line_number: int | None = None
-    match_type: str | None = None
-    metadata: dict | None = None
-
-
-@dataclass
-class SearchResponse:
-    """Search response with results and pagination.
-
-    Attributes:
-        query: Original search query
-        results: List of search results
-        total: Total number of matches
-        page: Current page number
-        size: Page size
-        search_type: Type of search performed
-    """
-
-    query: str
-    results: list[SearchResult]
-    total: int
-    page: int
-    size: int
-    search_type: SearchType = SearchType.FILENAME
-
-
-@dataclass
-class ActionResult:
-    """Result from an action.
-
-    Attributes:
-        success: Whether the action succeeded
-        message: Human-readable message about the result
-        data: Optional additional data
-    """
-
-    success: bool
-    message: str
-    data: dict | None = None
+from core.models.search import SearchResponse, SearchResult, SearchType
 
 
 class SearchActions:
@@ -115,7 +50,7 @@ class SearchActions:
         """Get search root directory."""
         if self._root is not None:
             return self._root
-        return self.config.root
+        return Path(self.config.root)
 
     def search(
         self,
@@ -275,7 +210,7 @@ class SearchActions:
         # We need the semantic indexer for content/hybrid search
         indexer = None
         if search_type in (SearchType.CONTENT, SearchType.HYBRID):
-             from core.actions.index_actions import IndexActions
+             from core.actions.index import IndexActions
              # Use IndexActions to get the configured indexer
              # This ensures we share the same Chroma configuration
              index_actions = IndexActions(config=self.config)
@@ -286,12 +221,12 @@ class SearchActions:
 
             return SpotlightAdapter(self.root, config=self.config)
         elif search_type == SearchType.CONTENT:
-            from core.adapters.semantic_search_adapter import SemanticSearchAdapter
+            from retrieval.adapters.semantic_search import SemanticSearchAdapter
 
             return SemanticSearchAdapter(indexer=indexer)
         elif search_type == SearchType.HYBRID:
             from retrieval.adapters.hybrid_search import HybridSearchAdapter
-            from core.adapters.semantic_search_adapter import SemanticSearchAdapter
+            from retrieval.adapters.semantic_search import SemanticSearchAdapter
 
             content_searcher = SemanticSearchAdapter(indexer=indexer)
             return HybridSearchAdapter(
@@ -307,7 +242,7 @@ class SearchActions:
         if not self.config.index.auto_index_on_search:
             return
 
-        from core.actions.index_actions import IndexActions
+        from core.actions.index import IndexActions
         
         index_actions = IndexActions(config=self.config)
         # Check if index is empty using semantic indexer stats (approximate via file count or just checking if any docs exist)

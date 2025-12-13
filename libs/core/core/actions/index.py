@@ -1,42 +1,10 @@
 """Index management actions."""
 
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Callable
 
-
-@dataclass
-class IndexStats:
-    """Index statistics information.
-
-    Attributes:
-        file_count: Number of files in the index
-        total_size_bytes: Total size in bytes (approximate)
-        last_indexed_at: Timestamp of last indexing
-        db_path: Path to the database
-        watcher_enabled: Whether the file watcher is enabled
-    """
-
-    file_count: int
-    total_size_bytes: int
-    last_indexed_at: float | None
-    db_path: str
-    watcher_enabled: bool = False
-
-
-@dataclass
-class ActionResult:
-    """Result from an action.
-
-    Attributes:
-        success: Whether the action succeeded
-        message: Human-readable message about the result
-        data: Optional additional data
-    """
-
-    success: bool
-    message: str
-    data: dict | None = None
+from core.models.actions import ActionResult
+from core.models.index import IndexStats
 
 
 class IndexActions:
@@ -68,11 +36,11 @@ class IndexActions:
     def semantic_indexer(self):
         """Get semantic indexer, creating if necessary."""
         if self._semantic_indexer is None:
-            from indexer.indexer import SemanticIndexer
-            from indexer.extraction.router import ExtractionRouter
             from indexer.chunking.router import ChunkingRouter
-            from indexer.extraction.adapters.text import TextExtractor
             from indexer.extraction.adapters.code import CodeExtractor
+            from indexer.extraction.adapters.text import TextExtractor
+            from indexer.extraction.router import ExtractionRouter
+            from indexer.indexer import SemanticIndexer
             from langchain_chroma import Chroma
 
             # 1. Setup routers
@@ -132,6 +100,7 @@ class IndexActions:
 
         return self._semantic_indexer
 
+    @property
     def get_stats(self) -> IndexStats:
         """Get index statistics.
 
@@ -161,6 +130,7 @@ class IndexActions:
         root: Path | None = None,
         rebuild: bool = False,
         progress_callback: Callable[[int, int, str], None] | None = None,
+        recursive: bool = True
     ) -> ActionResult:
         """Start indexing files (synchronous for now).
 
@@ -171,6 +141,10 @@ class IndexActions:
 
         Returns:
             ActionResult indicating success or failure
+            :param root:
+            :param rebuild:
+            :param progress_callback:
+            :param recursive:
         """
         indexing_root = Path(root or self.config.root)
         
@@ -180,7 +154,7 @@ class IndexActions:
         try:
             results = self.semantic_indexer.synchronize_directory(
                 directory=indexing_root,
-                recursive=True,
+                recursive=recursive,
                 progress_callback=progress_callback,
                 block_list=self.config.block_list,
                 force_rebuild=rebuild
@@ -220,7 +194,8 @@ class IndexActions:
         except Exception as e:
             return ActionResult(success=False, message=str(e))
     
-    def get_watcher_status(self) -> bool:
+    @staticmethod
+    def get_watcher_status() -> bool:
         """Get file watcher status."""
         return False
 

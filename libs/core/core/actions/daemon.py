@@ -1,48 +1,13 @@
 """Daemon management actions."""
 
-from dataclasses import dataclass
 from pathlib import Path
 
 import grpc
 
 from core import maven_pb2, maven_pb2_grpc
+from core.models.actions import ActionResult
+from core.models.daemon import DaemonStatus
 from core.process_manager import ProcessController
-
-
-@dataclass
-class DaemonStatus:
-    """Daemon status information.
-
-    Attributes:
-        running: Whether the daemon is running
-        pid: Process ID if running
-        uptime: Human-readable uptime string
-        indexing: Whether indexing is active
-        watcher_active: Whether the file watcher is active
-        files_indexed: Number of files indexed
-    """
-
-    running: bool
-    pid: int | None = None
-    uptime: str = ""
-    indexing: bool = False
-    watcher_active: bool = False
-    files_indexed: int = 0
-
-
-@dataclass
-class ActionResult:
-    """Result from an action.
-
-    Attributes:
-        success: Whether the action succeeded
-        message: Human-readable message about the result
-        data: Optional additional data
-    """
-
-    success: bool
-    message: str
-    data: dict | None = None
 
 
 class DaemonActions:

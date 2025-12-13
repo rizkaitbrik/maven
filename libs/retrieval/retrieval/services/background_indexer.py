@@ -13,9 +13,9 @@ class BackgroundIndexer:
     """Manages background indexing of files."""
 
     def __init__(
-        self,
-        index_manager: IndexManager,
-        config: RetrieverConfig
+            self,
+            index_manager: IndexManager,
+            config: RetrieverConfig
     ):
         """Initialize the background indexer.
         
@@ -43,7 +43,7 @@ class BackgroundIndexer:
             List of file paths to index
         """
         files = []
-        
+
         # Determine directories to scan
         if self.config.allowed_list:
             scan_dirs = []
@@ -53,36 +53,36 @@ class BackgroundIndexer:
                     path = Path(pattern).expanduser().resolve()
                     if path.exists() and path.is_dir():
                         scan_dirs.append(path)
-            
+
             if not scan_dirs:
                 scan_dirs = [root]
         else:
             scan_dirs = [root]
-        
+
         # Walk directories
         for scan_dir in scan_dirs:
             try:
                 for item in scan_dir.rglob('*'):
                     if not item.is_file():
                         continue
-                    
+
                     item_str = str(item)
-                    
+
                     # Apply filtering
                     if self.config.is_blocked(item_str):
                         continue
-                    
+
                     if not self.config.is_allowed(item_str):
                         continue
-                    
+
                     if not self.index_manager.content_extractor.is_text_file(item):
                         continue
-                    
+
                     files.append(item)
             except (PermissionError, OSError):
                 # Skip directories we can't access
                 continue
-        
+
         return files
 
     def _index_files(self, files: list[Path]):
@@ -94,43 +94,45 @@ class BackgroundIndexer:
         self._is_indexing = True
         self._indexed_count = 0
         self._total_count = len(files)
-        
+
         self.logger.info("Starting indexing", total_files=self._total_count)
-        
+
         try:
             for i, file_path in enumerate(files):
                 if not self._is_indexing:
                     # Indexing was cancelled
                     self.logger.warning("Indexing cancelled", indexed=self._indexed_count, total=self._total_count)
                     break
-                
+
                 try:
                     # Check if file needs indexing
                     if self.index_manager.needs_reindex(file_path):
                         self.index_manager.add_or_update_file(file_path)
                         self._indexed_count += 1
-                        self.logger.debug("File indexed", path=str(file_path), progress=f"{i+1}/{self._total_count}")
+                        self.logger.debug("File indexed", path=str(file_path), progress=f"{i + 1}/{self._total_count}")
                 except Exception as e:
                     self.logger.error("Failed to index file", path=str(file_path), error=str(e))
-                
+
                 # Report progress
                 if self._progress_callback and (i + 1) % 10 == 0:
                     self._progress_callback(i + 1, self._total_count)
-                
+
                 # Log progress every 100 files
                 if (i + 1) % 100 == 0:
-                    self.logger.info("Indexing progress", indexed=self._indexed_count, scanned=i+1, total=self._total_count)
-            
+                    self.logger.info("Indexing progress", indexed=self._indexed_count, scanned=i + 1,
+                                     total=self._total_count)
+
             # Final progress update
             if self._progress_callback:
                 self._progress_callback(self._total_count, self._total_count)
-            
-            self.logger.info("Indexing completed", indexed=self._indexed_count, scanned=len(files), total=self._total_count)
-            
+
+            self.logger.info("Indexing completed", indexed=self._indexed_count, scanned=len(files),
+                             total=self._total_count)
+
             # Start file system watcher after indexing completes
             if self._is_indexing and self.config.index.enable_watcher:
                 self._start_watcher()
-        
+
         finally:
             self._is_indexing = False
 
@@ -141,16 +143,16 @@ class BackgroundIndexer:
                 self.index_manager,
                 self.config
             )
-        
+
         if not self.fs_watcher.is_running():
             self.logger.info("Starting file system watcher after indexing")
             self.fs_watcher.start()
 
     def start_indexing(
-        self,
-        root: Path | None = None,
-        rebuild: bool = False,
-        progress_callback: Callable[[int, int], None] | None = None
+            self,
+            root: Path | None = None,
+            rebuild: bool = False,
+            progress_callback: Callable[[int, int], None] | None = None
     ):
         """Start indexing in the background.
         
@@ -162,22 +164,22 @@ class BackgroundIndexer:
         if self._is_indexing:
             self.logger.warning("Indexing already in progress")
             return
-        
+
         root = root or self.config.root
         self._progress_callback = progress_callback
-        
+
         self.logger.info("Preparing to index", root=str(root), rebuild=rebuild)
-        
+
         # Clear index if rebuilding
         if rebuild:
             self.logger.info("Rebuilding index, clearing existing entries")
             self.index_manager.clear()
-        
+
         # Get files to index
         self.logger.info("Scanning for indexable files", root=str(root))
         files = self._get_indexable_files(root)
         self.logger.info("Found indexable files", count=len(files))
-        
+
         # Start indexing in background thread
         self._indexing_thread = threading.Thread(
             target=self._index_files,
@@ -192,7 +194,7 @@ class BackgroundIndexer:
         if self._is_indexing:
             self.logger.info("Stopping indexing")
         self._is_indexing = False
-        
+
         if self._indexing_thread:
             self._indexing_thread.join(timeout=5.0)
             self._indexing_thread = None
@@ -220,4 +222,3 @@ class BackgroundIndexer:
     def get_watcher_status(self) -> bool:
         """Check if file system watcher is running."""
         return self.fs_watcher is not None and self.fs_watcher.is_running()
-

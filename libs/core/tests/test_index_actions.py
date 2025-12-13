@@ -3,7 +3,7 @@
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from core.actions.index_actions import (
+from core.actions.index import (
     ActionResult,
     IndexActions,
     IndexStats,
@@ -147,7 +147,7 @@ class TestIndexActions:
         actions = IndexActions(config=mock_config)
         actions._index_manager = mock_index_manager
 
-        stats = actions.get_stats()
+        stats = actions.get_stats
 
         assert stats.file_count == 100
         assert stats.total_size_bytes == 1024000

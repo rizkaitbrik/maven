@@ -1,13 +1,13 @@
 """Semantic search adapter using ChromaDB."""
 
-from retrieval.interfaces.retriever import Retriever
+from indexer.indexer import SemanticIndexer
+
 from retrieval.models.search import (
+    MatchType,
     SearchRequest,
     SearchResponse,
     SearchResult,
-    MatchType,
 )
-from indexer.indexer import SemanticIndexer
 
 
 class SemanticSearchAdapter:

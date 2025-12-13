@@ -3,7 +3,7 @@
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from core.actions.daemon_actions import (
+from core.actions.daemon import (
     ActionResult,
     DaemonActions,
     DaemonStatus,

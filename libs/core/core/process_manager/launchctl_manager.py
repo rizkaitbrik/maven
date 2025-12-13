@@ -3,27 +3,10 @@
 import os
 import subprocess
 import sys
-from dataclasses import dataclass
 from pathlib import Path
 
-from core.process_manager.plist_generator import LaunchAgentConfig, PlistGenerator
-
-
-@dataclass
-class LaunchctlResult:
-    """Result from a launchctl operation.
-
-    Attributes:
-        success: Whether the operation succeeded
-        message: Human-readable message about the result
-        exit_code: Exit code from launchctl command
-        stderr: Any error output
-    """
-
-    success: bool
-    message: str
-    exit_code: int = 0
-    stderr: str = ""
+from core.models.launchctl import LaunchAgentConfig, LaunchctlResult
+from core.process_manager.plist_generator import PlistGenerator
 
 
 class LaunchctlManager:
@@ -65,7 +48,8 @@ class LaunchctlManager:
         """
         self._plist_path = path
 
-    def is_macos(self) -> bool:
+    @staticmethod
+    def is_macos() -> bool:
         """Check if running on macOS.
 
         Returns:
@@ -347,7 +331,8 @@ class LaunchctlManager:
                 stderr=str(e),
             )
 
-    def _run_launchctl(self, *args: str) -> LaunchctlResult:
+    @staticmethod
+    def _run_launchctl(*args: str) -> LaunchctlResult:
         """Run a launchctl command.
 
         Args:

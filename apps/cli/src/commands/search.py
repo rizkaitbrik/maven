@@ -3,11 +3,10 @@ from pathlib import Path
 
 import typer
 from core.actions import SearchActions
-from core.actions.search_actions import SearchType
+from core.actions.search import SearchType
 from retrieval.services.config_manager import ConfigManager
 from rich.console import Console
 from rich.panel import Panel
-from rich.table import Table
 from rich.syntax import Syntax
 from rich.text import Text
 

@@ -4,25 +4,11 @@ import os
 import signal
 import subprocess
 import sys
-from dataclasses import dataclass
 from pathlib import Path
 
-from core.process_manager.launchctl_manager import LaunchctlManager, LaunchctlResult
-
-
-@dataclass
-class ProcessResult:
-    """Result from a process operation.
-
-    Attributes:
-        success: Whether the operation succeeded
-        message: Human-readable message about the result
-        pid: Process ID if applicable
-    """
-
-    success: bool
-    message: str
-    pid: int | None = None
+from core.models.launchctl import LaunchctlResult
+from core.models.process import ProcessResult
+from core.process_manager.launchctl_manager import LaunchctlManager
 
 
 class ProcessController:
@@ -53,7 +39,8 @@ class ProcessController:
         # Initialize launchctl manager for macOS
         self._launchctl = LaunchctlManager(label)
 
-    def is_macos(self) -> bool:
+    @staticmethod
+    def is_macos() -> bool:
         """Check if running on macOS.
 
         Returns:
@@ -300,7 +287,7 @@ class ProcessController:
                 message="Daemon stopped and unloaded via launchctl",
             )
 
-        # Fall back to stop + unload
+        # Fall back to stop and unload
         stop_result = self._launchctl.stop()
         unload_result = self._launchctl.unload()
 
@@ -464,7 +451,8 @@ class ProcessController:
         except (ValueError, OSError):
             return None
 
-    def _convert_launchctl_result(self, result: LaunchctlResult) -> ProcessResult:
+    @staticmethod
+    def _convert_launchctl_result(result: LaunchctlResult) -> ProcessResult:
         """Convert LaunchctlResult to ProcessResult.
 
         Args:

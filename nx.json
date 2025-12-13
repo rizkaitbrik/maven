@@ -3,7 +3,7 @@
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": ["default"],
-    "sharedGlobals": []
+    "sharedGlobals": ["{workspaceRoot}/go.work"]
   },
   "nxCloudId": "6902846dee1fdf417da0257a",
   "plugins": [
@@ -28,7 +28,8 @@
         "pyenvPythonVersion": "3.12",
         "packageManager": "uv"
       }
-    }
+    },
+    "@nx-go/nx-go"
   ],
   "generators": {
     "@nxlv/python:uv-project": {

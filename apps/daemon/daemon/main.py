@@ -17,21 +17,21 @@ def main():
     except Exception as e:
         print(f"Failed to load configuration: {e}", file=sys.stderr)
         sys.exit(1)
-    
+
     # Initialize logger
     logger = get_logger(
         'daemon.main',
         log_dir=Path(config.logging.log_dir).expanduser(),
         level=config.logging.level
     )
-    
+
     try:
         # Create daemon
         daemon = MavenDaemon(config)
-        
+
         # Start daemon
         daemon.start()
-        
+
         # Create and start gRPC server
         grpc_server = create_grpc_server(
             daemon,
@@ -39,20 +39,20 @@ def main():
             config.daemon.grpc_port
         )
         grpc_server.start()
-        
+
         logger.info(
             "gRPC server started",
             host=config.daemon.grpc_host,
             port=config.daemon.grpc_port
         )
-        
+
         # Wait for shutdown
         daemon.wait()
-        
+
         # Stop gRPC server
         grpc_server.stop(grace=5)
         logger.info("gRPC server stopped")
-        
+
     except KeyboardInterrupt:
         logger.info("Received keyboard interrupt")
         daemon.stop()
@@ -63,4 +63,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
